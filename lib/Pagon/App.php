@@ -208,7 +208,7 @@ class App extends EventEmitter
 
         // Set config
         $this->injectors =
-            (!is_array($config) ? Config::load((string)$config)->get() : $config)
+            (!is_array($config) ? Config::load((string)$config)->raw() : $config)
             + (!empty($this->injectors['cli']) ? array('buffer' => false) : array())
             + $this->injectors;
 
@@ -545,7 +545,7 @@ class App extends EventEmitter
         } elseif ($closure === true || is_string($closure)) {
             $_cli = $this->injectors['cli'];
             // Set route use default automatic
-            return $this->router->automatic = function ($path) use ($closure, $_cli, $index) {
+            return $this->router->inject('automatic', function ($path) use ($closure, $_cli, $index) {
                 $parts = array();
 
                 // Split rule
@@ -574,7 +574,7 @@ class App extends EventEmitter
 
                 // Try to lookup class and with it's index
                 return array($class, $class . '\\' . $index);
-            };
+            });
         }
         return false;
     }

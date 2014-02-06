@@ -231,36 +231,18 @@ class Fiber implements \ArrayAccess
      * Get injector
      *
      * @param string $key
-     * @param mixed  $default
+     * @param mixed  $value
      * @return bool|mixed
      */
-    public function get($key = null, $default = null)
+    public function raw($key = null, $value = null)
     {
-        if ($key === null) {
+        if ($value !== null) {
+            return $this->injectors[$key] = $value;
+        } else if ($key === null) {
             return $this->injectors;
         }
 
-        return isset($this->injectors[$key]) ? $this->injectors[$key] : $default;
-    }
-
-    /**
-     * Set injector
-     *
-     * @param string $key
-     * @param mixed  $value
-     * @return $this
-     */
-    public function set($key, $value = null)
-    {
-        if (is_array($key)) {
-            foreach ($key as $k => $v) {
-                $this->injectors[$k] = $v;
-            }
-        } else {
-            $this->injectors[$key] = $value;
-        }
-
-        return $this;
+        return isset($this->injectors[$key]) ? $this->injectors[$key] : null;
     }
 
     /**
