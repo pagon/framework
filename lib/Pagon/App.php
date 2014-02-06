@@ -874,13 +874,13 @@ class App extends EventEmitter
                 ))
             ) {
                 if ($this->injectors['cli']) {
-                    $this->halt($this->injectors['errors'][$type][0], $this->injectors['errors'][$type][1]);
+                    $this->halt($this->injectors['errors'][$type][0], $this->injectors['errors'][$type][1] . ': ' . ($route ? ($route instanceof \Exception ? $route->getFile() . ' [' . $route->getLine() . ']' : (string)$route) : ''));
                 } else {
                     $this->output->status($this->injectors['errors'][$type][0]);
                     if ($this->injectors['debug']) {
                         $this->renderView('Error', array(
                             'title'   => $route instanceof \Exception ? $route->getMessage() : $this->injectors['errors'][$type][1],
-                            'message' => $route ? ($route instanceof \Exception ? $route->getFile() . '[' . $route->getLine() . ']' : (string)$route) : 'Could not ' . $this->input->method() . ' ' . $this->input->path(),
+                            'message' => $route ? ($route instanceof \Exception ? $route->getFile() . ' [' . $route->getLine() . ']' : (string)$route) : 'Could not ' . $this->input->method() . ' ' . $this->input->path(),
                             'stacks'  => $this->injectors['debug'] && $route instanceof \Exception ? $route->getTraceAsString() : null
                         ));
                     } else {

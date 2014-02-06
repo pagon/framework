@@ -16,7 +16,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Pagon\Config', $config);
         $this->assertEquals(array('text/plain'), $config->txt);
 
-        $this->assertEquals($mimes, $config->get());
+        $this->assertEquals($mimes, $config->raw());
     }
 
     public function testExportUnknown()
@@ -43,7 +43,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
         $config = Config::export('test');
 
-        $this->assertEquals(array('test' => 'abc'), $config->get());
+        $this->assertEquals(array('test' => 'abc'), $config->raw());
 
         unlink('/tmp/test.json');
     }

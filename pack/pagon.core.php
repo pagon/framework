@@ -1726,7 +1726,7 @@ class App extends EventEmitter
                 ))
             ) {
                 if ($this->injectors['cli']) {
-                    $this->halt($this->injectors['errors'][$type][0], $this->injectors['errors'][$type][1]);
+                    $this->halt($this->injectors['errors'][$type][0], $this->injectors['errors'][$type][1] . ': ' . ($route ? ($route instanceof \Exception ? $route->getFile() . '[' . $route->getLine() . ']' : (string)$route) : ''));
                 } else {
                     $this->output->status($this->injectors['errors'][$type][0]);
                     if ($this->injectors['debug']) {
