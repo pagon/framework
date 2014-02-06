@@ -96,14 +96,14 @@ class FiberTest extends PHPUnit_Framework_TestCase
 
     public function testRaw()
     {
-        $this->assertEquals('a', $this->di->get('a'));
+        $this->assertEquals('a', $this->di->raw('a'));
 
         $closure = function () {
         };
 
-        $this->di->set('b', $closure);
+        $this->di->raw('b', $closure);
 
-        $this->assertEquals($closure, $this->di->get('b'));
+        $this->assertEquals($closure, $this->di->raw('b'));
     }
 
     public function testKeys()
