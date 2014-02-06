@@ -157,26 +157,15 @@ class Fiber implements \ArrayAccess
         return call_user_func_array($closure, $args);
     }
 
-    public function get($key = null, $default = null)
+    public function raw($key = null, $value = null)
     {
-        if ($key === null) {
+        if ($value !== null) {
+            return $this->injectors[$key] = $value;
+        } else if ($key === null) {
             return $this->injectors;
         }
 
-        return isset($this->injectors[$key]) ? $this->injectors[$key] : $default;
-    }
-
-    public function set($key, $value = null)
-    {
-        if (is_array($key)) {
-            foreach ($key as $k => $v) {
-                $this->injectors[$k] = $v;
-            }
-        } else {
-            $this->injectors[$key] = $value;
-        }
-
-        return $this;
+        return isset($this->injectors[$key]) ? $this->injectors[$key] : null;
     }
 
     public function keys()
@@ -1267,12 +1256,13 @@ class App extends EventEmitter
         spl_autoload_register(array($this, '__autoload'));
 
        
+        if ($this->injectors['cli'] === null) $this->injectors['cli'] = PHP_SAPI === 'cli';
+
+       
         $this->injectors =
-            (!is_array($config) ? Config::load((string)$config)->get() : $config)
+            (!is_array($config) ? Config::load((string)$config)->raw() : $config)
             + (!empty($this->injectors['cli']) ? array('buffer' => false) : array())
             + $this->injectors;
-
-        if ($this->injectors['cli'] === null) $this->injectors['cli'] = PHP_SAPI === 'cli';
 
        
         $this->injectors['locals']['config'] = & $this->injectors;
@@ -1473,7 +1463,7 @@ class App extends EventEmitter
         } elseif ($closure === true || is_string($closure)) {
             $_cli = $this->injectors['cli'];
            
-            return $this->router->automatic = function ($path) use ($closure, $_cli, $index) {
+            return $this->router->inject('automatic', function ($path) use ($closure, $_cli, $index) {
                 $parts = array();
 
                
@@ -1502,7 +1492,7 @@ class App extends EventEmitter
 
                
                 return array($class, $class . '\\' . $index);
-            };
+            });
         }
         return false;
     }

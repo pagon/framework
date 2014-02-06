@@ -206,13 +206,14 @@ class App extends EventEmitter
         // Register autoload
         spl_autoload_register(array($this, '__autoload'));
 
+        // Cli check
+        if ($this->injectors['cli'] === null) $this->injectors['cli'] = PHP_SAPI === 'cli';
+
         // Set config
         $this->injectors =
             (!is_array($config) ? Config::load((string)$config)->raw() : $config)
             + (!empty($this->injectors['cli']) ? array('buffer' => false) : array())
             + $this->injectors;
-
-        if ($this->injectors['cli'] === null) $this->injectors['cli'] = PHP_SAPI === 'cli';
 
         // Set default locals
         $this->injectors['locals']['config'] = & $this->injectors;
