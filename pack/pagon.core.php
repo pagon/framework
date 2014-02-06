@@ -37,6 +37,8 @@ class Fiber implements \ArrayAccess
 
     protected $injectorsMap = array();
 
+    protected $autoDefine = false;
+
     public function __construct(array $injectors = array())
     {
         $this->injectors = $injectors + $this->injectors;
@@ -50,6 +52,12 @@ class Fiber implements \ArrayAccess
 
     public function __set($key, $value)
     {
+       
+        if ($this->autoDefine && method_exists($this, 'set' . $key)) {
+            $this->injectors[$key] = $this->{'set' . $key} ($value);
+            return;
+        }
+
         $this->injectors[$key] = $value instanceof \Closure ? array($value, 'F$' => 1) : $value;
     }
 
@@ -86,6 +94,13 @@ class Fiber implements \ArrayAccess
         } else {
             $tmp = & $this->injectors[$key];
         }
+
+       
+        if ($this->autoDefine && method_exists($this, 'get' . $key)) {
+            $tmp = $this->{'get' . $key} ($tmp);
+        }
+
+
         return $tmp;
     }
 
@@ -126,10 +141,11 @@ class Fiber implements \ArrayAccess
 
     public function extend($key, \Closure $closure)
     {
+        $factory = isset($this->injectors[$key]) ? $this->injectors[$key] : null;
         $that = $this;
-        return $this->injectors[$key] = array(function () use ($closure, $that) {
-            return $closure($that->$key, $that);
-        }, 'F$' => isset($this->injectors[$key]['F$']) ? $this->injectors[$key]['F$'] : 1);
+        return $this->injectors[$key] = array(function () use ($closure, $factory, $that) {
+            return $closure(isset($factory[0]) && isset($factory['F$']) && $factory[0] instanceof \Closure ? $factory[0]() : $factory, $that);
+        }, 'F$' => isset($factory['F$']) ? $factory['F$'] : 0);
     }
 
     public function __call($method, $args)
@@ -434,6 +450,8 @@ abstract class Middleware extends EventEmitter
 
 abstract class Route extends Middleware
 {
+    protected $params = array();
+
     protected function before()
     {
        
@@ -446,6 +464,9 @@ abstract class Route extends Middleware
 
     public function call()
     {
+       
+        $this->params = $this->input->params;
+
        
         $run = !empty($this->injectors['entry']) ? $this->injectors['entry'] : 'run';
 
@@ -1190,9 +1211,13 @@ class App extends EventEmitter
             'destroy' => array('DELETE', ':id')
         ),
         'safe_query' => true,
+
         'input'      => null,
         'output'     => null,
         'router'     => null,
+
+        'running'    => false,
+        'cli'        => null,
     );
 
     public $input;
@@ -1201,23 +1226,16 @@ class App extends EventEmitter
 
     public $router;
 
-    private $_run = false;
-
-    private static $_cli = null;
-
     protected static $self;
 
     protected static $loads = array();
 
     public static function create($config = array())
     {
-       
-        if (is_null(self::$_cli)) self::$_cli = PHP_SAPI == 'cli';
-
         $app = new self($config);
 
        
-        if (!self::$_cli) {
+        if (!$app->cli()) {
             $app->input = new Http\Input(array('app' => $app));
             $app->output = new Http\Output(array('app' => $app));
         } else {
@@ -1254,8 +1272,7 @@ class App extends EventEmitter
             + (!empty($this->injectors['cli']) ? array('buffer' => false) : array())
             + $this->injectors;
 
-       
-        if (!isset($this->injectors['cli'])) $this->injectors['cli'] = self::$_cli;
+        if ($this->injectors['cli'] === null) $this->injectors['cli'] = PHP_SAPI === 'cli';
 
        
         $this->injectors['locals']['config'] = & $this->injectors;
@@ -1283,7 +1300,7 @@ class App extends EventEmitter
 
     public function running()
     {
-        return $this->_run;
+        return $this->injectors['running'];
     }
 
     public function set($key, $value = null)
@@ -1591,7 +1608,7 @@ class App extends EventEmitter
     public function run()
     {
        
-        if ($this->_run) {
+        if ($this->injectors['running']) {
             throw new \RuntimeException("Application already running");
         }
 
@@ -1602,7 +1619,7 @@ class App extends EventEmitter
         $this->emit('run');
 
        
-        $this->_run = true;
+        $this->injectors['running'] = true;
 
         $_path = $this->input->path();
         $this->registerErrorHandler();
@@ -1684,7 +1701,7 @@ class App extends EventEmitter
             $this->emit('error');
         }
 
-        $this->_run = false;
+        $this->injectors['running'] = false;
 
        
         $this->emit('flush');
@@ -1866,7 +1883,7 @@ class App extends EventEmitter
     public function __shutdown()
     {
         $this->emit('exit');
-        if (!$this->_run) return;
+        if (!$this->injectors['running']) return;
 
         if (($error = error_get_last())
             && in_array($error['type'], array(E_PARSE, E_ERROR, E_USER_ERROR, E_COMPILE_ERROR, E_CORE_ERROR))
