@@ -1726,13 +1726,13 @@ class App extends EventEmitter
                 ))
             ) {
                 if ($this->injectors['cli']) {
-                    $this->halt($this->injectors['errors'][$type][0], $this->injectors['errors'][$type][1] . ': ' . ($route ? ($route instanceof \Exception ? $route->getFile() . '[' . $route->getLine() . ']' : (string)$route) : ''));
+                    $this->halt($this->injectors['errors'][$type][0], $this->injectors['errors'][$type][1] . ': ' . ($route ? ($route instanceof \Exception ? $route->getFile() . ' [' . $route->getLine() . ']' : (string)$route) : ''));
                 } else {
                     $this->output->status($this->injectors['errors'][$type][0]);
                     if ($this->injectors['debug']) {
                         $this->renderView('Error', array(
                             'title'   => $route instanceof \Exception ? $route->getMessage() : $this->injectors['errors'][$type][1],
-                            'message' => $route ? ($route instanceof \Exception ? $route->getFile() . '[' . $route->getLine() . ']' : (string)$route) : 'Could not ' . $this->input->method() . ' ' . $this->input->path(),
+                            'message' => $route ? ($route instanceof \Exception ? $route->getFile() . ' [' . $route->getLine() . ']' : (string)$route) : 'Could not ' . $this->input->method() . ' ' . $this->input->path(),
                             'stacks'  => $this->injectors['debug'] && $route instanceof \Exception ? $route->getTraceAsString() : null
                         ));
                     } else {
@@ -2657,7 +2657,7 @@ class Output extends EventEmitter
             $this->injectors['status'] = (int)$status;
             return $this;
         } else {
-            throw new \Exception('Unknown status :value', array(':value' => $status));
+            throw new \InvalidArgumentException('Unknown status: ' . $status);
         }
     }
 
@@ -2794,10 +2794,10 @@ class Output extends EventEmitter
 
     public function sendHeader()
     {
+        $this->emit('header');
+
        
         if (headers_sent() === false) {
-            $this->emit('header');
-
            
             header(sprintf('HTTP/%s %s %s', $this->app->input->protocol(), $this->injectors['status'], $this->message()));
 

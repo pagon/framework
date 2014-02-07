@@ -167,7 +167,7 @@ class Output extends EventEmitter
             $this->injectors['status'] = (int)$status;
             return $this;
         } else {
-            throw new \Exception('Unknown status :value', array(':value' => $status));
+            throw new \InvalidArgumentException('Unknown status: ' . $status);
         }
     }
 
@@ -359,10 +359,10 @@ class Output extends EventEmitter
      */
     public function sendHeader()
     {
+        $this->emit('header');
+
         // Check header
         if (headers_sent() === false) {
-            $this->emit('header');
-
             // Send header
             header(sprintf('HTTP/%s %s %s', $this->app->input->protocol(), $this->injectors['status'], $this->message()));
 
