@@ -13,7 +13,7 @@ use Pagon\Utility\ArgParser;
  * @package Pagon\Route
  * @method run(Input $input, Output $output)
  */
-abstract class Cli extends Route
+abstract class Command extends Route
 {
     protected $arguments = array();
     protected $usage = '';
