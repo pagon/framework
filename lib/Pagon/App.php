@@ -865,7 +865,6 @@ class App extends EventEmitter
             $this->injectors['errors'][$type][2] = $route;
         } else {
             ob_get_level() && ob_clean();
-            ob_start();
             if (empty($this->injectors['errors'][$type][2])
                 || !$this->router->run($this->injectors['errors'][$type][2], array('error' => array(
                     'type'    => $type,
