@@ -58,7 +58,7 @@ class Fiber implements \ArrayAccess
         // Apply the mapping
         foreach ($this->injectorsMap as $k => $v) {
             $k = is_numeric($k) ? $v : $k;
-            $this->injectors[$k] = array($k, 'F$' => 2);
+            $this->injectors[$k] = array($v, 'F$' => 2);
         }
     }
 

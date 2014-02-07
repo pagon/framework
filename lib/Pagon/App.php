@@ -873,7 +873,7 @@ class App extends EventEmitter
                 ))
             ) {
                 if ($this->injectors['cli']) {
-                    $this->halt($this->injectors['errors'][$type][0], $this->injectors['errors'][$type][1] . ': ' . ($route ? ($route instanceof \Exception ? $route->getFile() . ' [' . $route->getLine() . ']' : (string)$route) : ''));
+                    $this->halt($this->injectors['errors'][$type][0], ($route instanceof \Exception ? $route->getMessage() : $this->injectors['errors'][$type][1]) . ': ' . ($route ? ($route instanceof \Exception ? $route->getFile() . ' [' . $route->getLine() . ']' : (string)$route) : $this->input->path()) . "\n");
                 } else {
                     $this->output->status($this->injectors['errors'][$type][0]);
                     if ($this->injectors['debug']) {
@@ -948,6 +948,9 @@ class App extends EventEmitter
 
         // Send
         echo $this->output->body();
+
+        // Shutdown the output buffer
+        ob_end_flush();
 
         // Clear
         $this->output->clear();

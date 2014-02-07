@@ -36,7 +36,7 @@ class PrettyException extends Middleware
     public function render(\Exception $e)
     {
         // Check if buffer start
-        if ($this->app->buffer) ob_clean();
+        ob_get_level() && ob_clean();
 
         if ($e->getFile() === dirname(__DIR__) . '/Fiber.php') {
             $trace = $e->getTrace();
