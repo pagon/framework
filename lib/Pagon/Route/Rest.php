@@ -21,6 +21,7 @@
 
 namespace Pagon\Route;
 
+use Pagon\Exception\Pass;
 use Pagon\Http\Input;
 use Pagon\Http\Output;
 use Pagon\Route;
@@ -51,10 +52,16 @@ abstract class Rest extends Route
         $method = strtolower($this->input->method());
 
         $this->before();
+
         // Fallback call all
-        if (!method_exists($this, $method) && method_exists($this, 'missing')) {
-            $method = 'missing';
+        if (!method_exists($this, $method)) {
+            if (method_exists($this, 'missing')) {
+                $method = 'missing';
+            } else {
+                throw new Pass;
+            }
         }
+
         $this->$method($this->input, $this->output);
         $this->after();
     }
