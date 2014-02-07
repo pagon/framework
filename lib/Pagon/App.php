@@ -2,8 +2,8 @@
 /**
  * Pagon Framework
  *
- * @package       Pagon
- * @author        Corrie Zhao <hfcorriez@gmail.com>
+ * @package           Pagon
+ * @author            Corrie Zhao <hfcorriez@gmail.com>
  * @copyright     (c) 2011 - 2013 Pagon Framework
  */
 
@@ -950,7 +950,7 @@ class App extends EventEmitter
         echo $this->output->body();
 
         // Shutdown the output buffer
-        ob_end_flush();
+        $this->injectors['buffer'] && ob_get_level() && ob_end_flush();
 
         // Clear
         $this->output->clear();
