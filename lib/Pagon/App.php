@@ -487,6 +487,11 @@ class App extends EventEmitter
      */
     public function command($path, $route = null, $more = null)
     {
+        if ($path instanceof \Closure) {
+            $route = $path;
+            $path = '';
+        }
+
         if ($more !== null) {
             return $this->router->map($path . '( :args)', array_slice(func_get_args(), 1), "CLI");
         } else {
