@@ -4,7 +4,7 @@
  *
  * @package           Pagon
  * @author            Corrie Zhao <hfcorriez@gmail.com>
- * @copyright     (c) 2011 - 2013 Pagon Framework
+ * @copyright         (c) 2011 - 2013 Pagon Framework
  */
 
 namespace Pagon;
@@ -872,20 +872,29 @@ class App extends EventEmitter
                     'message' => $this->injectors['errors'][$type])
                 ))
             ) {
+                $error = $route instanceof \Exception ? $route : null;
+                $title = $error ? $error->getMessage() : $this->injectors['errors'][$type][1];
+                $code = $this->injectors['errors'][$type][0];
+                $message = $route ? ($error ? $error->getFile() . ' [' . $error->getLine() . ']' : (string)$route) : '';
+
                 if ($this->injectors['cli']) {
-                    $this->halt($this->injectors['errors'][$type][0], ($route instanceof \Exception ? $route->getMessage() : $this->injectors['errors'][$type][1]) . ': ' . ($route ? ($route instanceof \Exception ? $route->getFile() . ' [' . $route->getLine() . ']' : (string)$route) : $this->input->path()) . "\n");
+                    $this->halt($code,
+                        Console::text('[' . $title . '] ', 'red') . "\n" .
+                        ($message ? $message : '"' . $this->input->path() . '"') . "\n" .
+                        ($this->injectors['debug'] && $error ? Console::text("\n[Error]\n", "yellow") . Console::text($error) . "\n" : '')
+                    );
                 } else {
                     $this->output->status($this->injectors['errors'][$type][0]);
                     if ($this->injectors['debug']) {
                         $this->renderView('Error', array(
-                            'title'   => $route instanceof \Exception ? $route->getMessage() : $this->injectors['errors'][$type][1],
-                            'message' => $route ? ($route instanceof \Exception ? $route->getFile() . ' [' . $route->getLine() . ']' : (string)$route) : 'Could not ' . $this->input->method() . ' ' . $this->input->path(),
-                            'stacks'  => $this->injectors['debug'] && $route instanceof \Exception ? $route->getTraceAsString() : null
+                            'title'   => $title,
+                            'message' => $message ? $message : 'Could not ' . $this->input->method() . ' ' . $this->input->path(),
+                            'stacks'  => $this->injectors['debug'] && $error ? $error->getTraceAsString() : null
                         ));
                     } else {
                         $this->renderView('Error', array(
-                            'title'   => $this->injectors['errors'][$type][1],
-                            'message' => $route ? ($route instanceof \Exception ? $route->getMessage() : (string)$route) : 'Could not ' . $this->input->method() . ' ' . $this->input->path()
+                            'title'   => $title,
+                            'message' => $message ? $message : 'Could not ' . $this->input->method() . ' ' . $this->input->path()
                         ));
                     }
 
