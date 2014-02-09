@@ -46,10 +46,10 @@ class Input extends EventEmitter
     {
         parent::__construct($injectors + array(
             'params' => array(),
-            'query'  => &$_GET,
-            'data'   => &$_POST,
-            'files'  => &$_FILES,
-            'server' => &$_SERVER,
+            'query'  => $_GET,
+            'data'   => $_POST,
+            'files'  => $_FILES,
+            'server' => $_SERVER,
             'app'    => null
         ));
 

@@ -22,11 +22,22 @@ class Input extends EventEmitter
     public $app;
 
     /**
+     * @var array Mapping
+     */
+    protected $injectorsMap = array(
+        'path', 'method', 'body'
+    );
+
+    /**
      * @param array $injectors
      */
     public function __construct(array $injectors = array())
     {
-        parent::__construct($injectors + array('params' => array(), 'app' => null) + $_SERVER);
+        parent::__construct($injectors + array(
+                'params' => array(),
+                'app'    => null,
+                'server' => $_SERVER
+            ));
 
         $this->app = & $this->injectors['app'];
     }
@@ -53,17 +64,12 @@ class Input extends EventEmitter
      */
     public function path()
     {
-        if (!isset($this->injectors['path_info'])) {
-            if (!empty($GLOBALS['argv'])) {
-                $argv = $GLOBALS['argv'];
-                array_shift($argv);
-                $this->injectors['path_info'] = join(' ', $argv);
-            } else {
-                $this->injectors['path_info'] = '';
-            }
+        if (!empty($GLOBALS['argv'])) {
+            $argv = $GLOBALS['argv'];
+            array_shift($argv);
+            return join(' ', $argv);
         }
-
-        return $this->injectors['path_info'];
+        return '';
     }
 
     /**
