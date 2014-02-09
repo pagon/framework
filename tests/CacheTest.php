@@ -22,7 +22,9 @@ class CacheTest extends \PHPUnit_Framework_TestCase
                 )
             )
         ));
+        ob_start();
         $this->app->run();
+        ob_end_clean();
     }
 
     public function testFactory()

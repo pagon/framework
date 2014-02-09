@@ -46,7 +46,9 @@ class UrlTest extends \PHPUnit_Framework_TestCase
             'REQUEST_TIME'         => 1375528769,
         );
         $this->app->input = new Input(array('app' => $this->app));
+        ob_start();
         $this->app->run();
+        ob_end_clean();
     }
 
     public function testSite()
