@@ -884,9 +884,8 @@ class App extends EventEmitter
 
                 if ($this->injectors['cli']) {
                     $this->halt($code,
-                        Console::text('[' . $title . '] ', 'red') . "\n" .
-                        ($message ? $message : '"' . $this->input->path() . '"') . "\n" .
-                        ($this->injectors['debug'] && $error ? Console::text("\n[Error]\n", "yellow") . Console::text($error) . "\n" : '')
+                        Console::text('[' . $title . '] ' . ($message ? $message : '"' . $this->input->path() . '"') . ' ', 'redbg') . "\n" .
+                        ($this->injectors['debug'] && $error ? Console::text("\n[Error]\n", "yellow") . $error . "\n" : '')
                     );
                 } else {
                     $this->output->status($this->injectors['errors'][$type][0]);
