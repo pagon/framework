@@ -393,45 +393,77 @@ class Output extends EventEmitter
                 }
             }
 
-            // Set cookie
+            // Check cookie
             if ($this->injectors['cookies']) {
-                $_default = $this->app->cookie;
-                if (!$_default) {
-                    $_default = array(
-                        'path'     => '/',
-                        'domain'   => null,
-                        'secure'   => false,
-                        'httponly' => false,
-                        'timeout'  => 0,
-                        'sign'     => false,
-                        'secret'   => '',
-                        'encrypt'  => false,
-                    );
-                }
-                // Loop for set
-                foreach ($this->injectors['cookies'] as $key => $value) {
-                    $_option = (array)$value[1] + $_default;
-                    $value = $value[0];
-                    // Json object cookie
-                    if (is_array($value)) {
-                        $value = 'j:' . json_encode($value);
-                    }
-
-                    // Sign cookie
-                    if ($_option['sign'] && $_default['secret']) {
-                        $value = 's:' . $value . '.' . hash_hmac('sha1', $value, $_default['secret']);
-                    }
-
-                    // Encrypt
-                    if ($_option['encrypt']) {
-                        $value = 'c:' . $this->app->cryptor->encrypt($value);
-                    }
-
+                // Build cookie
+                $this->buildCookie(function ($key, $value, $_option) {
                     // Set cookie
-                    setcookie($key, $value, time() + $_option['timeout'], $_option['path'], $_option['domain'], $_option['secure'], $_option['httponly']);
-                }
+                    setcookie($key, $value, $_option['maxage'], $_option['path'], $_option['domain'], $_option['secure'], $_option['httponly']);
+                });
             }
         }
+        return $this;
+    }
+
+    /**
+     * Build current cookies
+     *
+     * @param callable $cb
+     * @return $this|array|Output
+     */
+    public function buildCookie(\Closure $cb = null)
+    {
+        if (!$this->injectors['cookies']) return !$cb ? array() : $this;
+
+        if (!$cb) $cookies = array();
+
+        // Set cookie
+        $_default = $this->app->cookie;
+        if (!$_default) {
+            $_default = array(
+                'path'     => '/',
+                'domain'   => null,
+                'secure'   => false,
+                'httponly' => false,
+                'timeout'  => 0,
+                'sign'     => false,
+                'secret'   => '',
+                'encrypt'  => false,
+            );
+        }
+        // Loop for set
+        foreach ($this->injectors['cookies'] as $key => $value) {
+            $_option = (array)$value[1] + $_default;
+            $value = $value[0];
+            // Json object cookie
+            if (is_array($value)) {
+                $value = 'j:' . json_encode($value);
+            }
+
+            // Sign cookie
+            if ($_option['sign'] && $_default['secret']) {
+                $value = 's:' . $value . '.' . hash_hmac('sha1', $value, $_default['secret']);
+            }
+
+            // Encrypt
+            if ($_option['encrypt']) {
+                $value = 'c:' . $this->app->cryptor->encrypt($value);
+            }
+
+            if ($_option['timeout']) {
+                $_option['maxage'] = time() + $_option['timeout'];
+            }
+
+            // Set cookie
+            if ($cb) {
+                $cb($key, $value, $_option);
+            } else {
+                $cookies[] = array('key' => $key, 'value' => $value, 'option' => $_option);
+            }
+        }
+
+        if (!$cb) return $cookies;
+
         return $this;
     }
 

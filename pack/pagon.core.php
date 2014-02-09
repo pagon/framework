@@ -46,7 +46,7 @@ class Fiber implements \ArrayAccess
        
         foreach ($this->injectorsMap as $k => $v) {
             $k = is_numeric($k) ? $v : $k;
-            $this->injectors[$k] = array($k, 'F$' => 2);
+            $this->injectors[$k] = array($v, 'F$' => 2);
         }
     }
 
@@ -1725,7 +1725,7 @@ class App extends EventEmitter
                 ))
             ) {
                 if ($this->injectors['cli']) {
-                    $this->halt($this->injectors['errors'][$type][0], $this->injectors['errors'][$type][1] . ': ' . ($route ? ($route instanceof \Exception ? $route->getFile() . ' [' . $route->getLine() . ']' : (string)$route) : ''));
+                    $this->halt($this->injectors['errors'][$type][0], ($route instanceof \Exception ? $route->getMessage() : $this->injectors['errors'][$type][1]) . ': ' . ($route ? ($route instanceof \Exception ? $route->getFile() . ' [' . $route->getLine() . ']' : (string)$route) : $this->input->path()) . "\n");
                 } else {
                     $this->output->status($this->injectors['errors'][$type][0]);
                     if ($this->injectors['debug']) {
@@ -1781,6 +1781,9 @@ class App extends EventEmitter
 
        
         echo $this->output->body();
+
+       
+        $this->injectors['buffer'] && ob_get_level() && ob_end_flush();
 
        
         $this->output->clear();
@@ -2829,43 +2832,69 @@ class Output extends EventEmitter
 
            
             if ($this->injectors['cookies']) {
-                $_default = $this->app->cookie;
-                if (!$_default) {
-                    $_default = array(
-                        'path'     => '/',
-                        'domain'   => null,
-                        'secure'   => false,
-                        'httponly' => false,
-                        'timeout'  => 0,
-                        'sign'     => false,
-                        'secret'   => '',
-                        'encrypt'  => false,
-                    );
-                }
                
-                foreach ($this->injectors['cookies'] as $key => $value) {
-                    $_option = (array)$value[1] + $_default;
-                    $value = $value[0];
+                $this->buildCookie(function ($key, $value, $_option) {
                    
-                    if (is_array($value)) {
-                        $value = 'j:' . json_encode($value);
-                    }
-
-                   
-                    if ($_option['sign'] && $_default['secret']) {
-                        $value = 's:' . $value . '.' . hash_hmac('sha1', $value, $_default['secret']);
-                    }
-
-                   
-                    if ($_option['encrypt']) {
-                        $value = 'c:' . $this->app->cryptor->encrypt($value);
-                    }
-
-                   
-                    setcookie($key, $value, time() + $_option['timeout'], $_option['path'], $_option['domain'], $_option['secure'], $_option['httponly']);
-                }
+                    setcookie($key, $value, $_option['maxage'], $_option['path'], $_option['domain'], $_option['secure'], $_option['httponly']);
+                });
             }
         }
+        return $this;
+    }
+
+    public function buildCookie(\Closure $cb = null)
+    {
+        if (!$this->injectors['cookies']) return !$cb ? array() : $this;
+
+        if (!$cb) $cookies = array();
+
+       
+        $_default = $this->app->cookie;
+        if (!$_default) {
+            $_default = array(
+                'path'     => '/',
+                'domain'   => null,
+                'secure'   => false,
+                'httponly' => false,
+                'timeout'  => 0,
+                'sign'     => false,
+                'secret'   => '',
+                'encrypt'  => false,
+            );
+        }
+       
+        foreach ($this->injectors['cookies'] as $key => $value) {
+            $_option = (array)$value[1] + $_default;
+            $value = $value[0];
+           
+            if (is_array($value)) {
+                $value = 'j:' . json_encode($value);
+            }
+
+           
+            if ($_option['sign'] && $_default['secret']) {
+                $value = 's:' . $value . '.' . hash_hmac('sha1', $value, $_default['secret']);
+            }
+
+           
+            if ($_option['encrypt']) {
+                $value = 'c:' . $this->app->cryptor->encrypt($value);
+            }
+
+            if ($_option['timeout']) {
+                $_option['maxage'] = time() + $_option['timeout'];
+            }
+
+           
+            if ($cb) {
+                $cb($key, $value, $_option);
+            } else {
+                $cookies[] = array('key' => $key, 'value' => $value, 'option' => $_option);
+            }
+        }
+
+        if (!$cb) return $cookies;
+
         return $this;
     }
 
