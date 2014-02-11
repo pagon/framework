@@ -1,48 +1,38 @@
 # 安装
 
-## 发行版
+## 新项目
+
+下载最新版：
 
 [下载最新版](https://github.com/hfcorriez/pagon/releases)
 
 Git下载：
 
 ```
-git clone https://github.com/hfcorriez/pagon
+$ git clone https://github.com/hfcorriez/pagon
 ```
 
-## Composer
-
-### 已有项目
+Composer:
 
 ```
-$ composer.phar require pagon/pagon="*"
+$ composer.phar create-project pagon/pagon myapp
 ```
 
-### 新项目
-
-> （使用 [`pagon/app`](https://github.com/pagon/app) skelton创建应用）
+单文件：
 
 ```
-$ composer.phar create-project pagon/app myapp
+$ wget https://github.com/hfcorriez/pagon/raw/0.8.0-dev/pack/pagon.core.php
 ```
 
-## 单文件
+## 已有项目
 
-下载
+Composer:
 
 ```
-wget https://github.com/hfcorriez/pagon/raw/0.8.0-dev/pack/pagon.core.php
-```
+$ composer.phar require pagon/framework="*"
+``
 
-使用
-
-```php
-require('pagon.core.php');
-
-$app = Pagon\App::create();
-```
-
-# 入门
+# 使用
 
 ## Hello world
 
