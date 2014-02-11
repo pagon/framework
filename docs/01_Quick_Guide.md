@@ -4,7 +4,7 @@
 
 下载最新版：
 
-[下载最新版](https://github.com/hfcorriez/pagon/releases)
+[https://github.com/hfcorriez/pagon/releases](https://github.com/hfcorriez/pagon/releases)
 
 Git下载：
 
@@ -30,7 +30,7 @@ Composer:
 
 ```
 $ composer.phar require pagon/framework="*"
-``
+```
 
 # 使用
 
