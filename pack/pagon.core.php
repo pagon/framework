@@ -2,6 +2,7 @@
 
 namespace Pagon {
 
+use Pagon\Session\Store;
 use Pagon\Exception\Pass;
 use Pagon\Exception\Stop;
 use Pagon\Http\Input;
@@ -1903,6 +1904,178 @@ class App extends EventEmitter
     }
 }
 
+
+
+class Session extends Fiber
+{
+    public static $defaultStore;
+
+    public static $current;
+
+    protected $injectors = array(
+        'use_cookie' => true,
+
+        'id'         => null,
+
+        'store'      => null,
+
+        'sessions'   => array(),
+
+        'destroyed'  => false,
+
+        'started'    => false,
+
+        'app'        => null
+    );
+
+    public static function factory(array $config = array())
+    {
+        return new self($config);
+    }
+
+    public static function start(array $config = array())
+    {
+        $session = self::factory($config);
+        $session->startSession();
+        return $session;
+    }
+
+    public function __construct(array $injectors = array())
+    {
+        parent::__construct($injectors + $this->injectors);
+
+       
+        if (self::$defaultStore && $this->injectors['store'] === null) {
+            $this->injectors['store'] = self::$defaultStore;
+        }
+
+       
+        if ($this->injectors['store'] && !$this->injectors['store'] instanceof Store) {
+            $this->injectors['store'] = Store::factory($this->injectors['store']);
+
+           
+            if (!self::$defaultStore) {
+                self::$defaultStore = $this->injectors['store'];
+            }
+        }
+
+       
+        if (!$this->injectors['app']) {
+            $this->injectors['app'] = App::self();
+        }
+    }
+
+    public function startSession()
+    {
+       
+        $name = session_name();
+
+       
+        if (!$this->injectors['id']) {
+            if (isset($_COOKIE[$name])) {
+                $this->injectors['id'] = $_COOKIE[$name];
+            } else {
+                $this->injectors['id'] = sha1(microtime(true) . rand(1000, 9999));
+            }
+        }
+
+       
+        ini_set('session.use_cookies', 0);
+        session_cache_limiter(false);
+
+       
+        if ($this->injectors['store']) {
+            $this->injectors['store']->register($this);
+            $this->injectors['store']->app = $this->injectors['app'];
+
+            session_set_save_handler(
+                array($this->injectors['store'], 'open'),
+                array($this->injectors['store'], 'close'),
+                array($this->injectors['store'], 'read'),
+                array($this->injectors['store'], 'write'),
+                array($this->injectors['store'], 'destroy'),
+                array($this->injectors['store'], 'gc')
+            );
+        } else {
+            $this->injectors['app']->on('end', function () {
+                session_write_close();
+            });
+        }
+
+       
+        if (!isset($_COOKIE[$name])) {
+            $this->injectors['app']->output->cookie($name, $this->injectors['id']);
+        }
+
+       
+        session_id($this->injectors['id']);
+        if (!session_start()) {
+            throw new \RuntimeException("Session start failed");
+        }
+
+       
+        $this->injectors['sessions'] = & $_SESSION;
+
+       
+        $this->injectors['started'] = true;
+
+        self::$current = $this;
+    }
+
+    public function hasSession($key)
+    {
+        return isset($this->injectors['sessions'][$key]);
+    }
+
+    public function getSession($key, $default = null)
+    {
+        return isset($this->injectors['sessions'][$key]) ? $this->injectors['sessions'][$key] : $default;
+    }
+
+    public function setSession($key, $value)
+    {
+        $this->injectors['sessions'][$key] = $value;
+    }
+
+    public function deleteSession($key)
+    {
+        unset($this->injectors['sessions'][$key]);
+    }
+
+    public function allSession()
+    {
+        return $this->injectors['sessions'];
+    }
+
+    public function clear()
+    {
+        $this->injectors['sessions'] = array();
+    }
+
+    public function destroySession()
+    {
+        session_destroy();
+    }
+
+    public function saveSession()
+    {
+        session_write_close();
+    }
+
+    public static function __callStatic($method, $args)
+    {
+        if (!self::$current) {
+            throw new \RuntimeException("No session started");
+        }
+
+        return call_user_func_array(array(self::$current, $method . 'Session'), $args);
+    }
+
+    public function __call($method, $args)
+    {
+        return call_user_func_array(array($this, $method . 'Session'), $args);
+    }
+} 
 }
 
 namespace Pagon\View {
@@ -2076,6 +2249,168 @@ HTML;
 HTML;
 
         return $__html;
+    }
+}
+
+}
+
+namespace Pagon\Session {
+
+use Pagon\Fiber;
+use Pagon\Session;
+
+
+
+abstract class Store extends Fiber
+{
+    public static function factory($type, array $config = array())
+    {
+        if (is_array($type)) {
+            $config = $type['config'];
+            $type = $type['type'];
+        }
+
+        $class = __NAMESPACE__ . '\\Store\\' . ucfirst(strtolower($type));
+
+        if (!class_exists($class) && !class_exists($class = $type)) {
+            throw new \InvalidArgumentException('Can not find given "' . $type . '" session store adapter');
+        }
+
+        return new $class($config);
+    }
+
+    public function __construct(array $injectors = array())
+    {
+        parent::__construct($injectors + $this->injectors);
+
+        if (!isset($this->injectors['lifetime'])) {
+            $this->injectors['lifetime'] = ini_get('session.gc_maxlifetime');
+        }
+    }
+
+    public function register(Session $session)
+    {
+        $session->app->on('end', function () use ($session) {
+            $session->saveSession();
+        });
+    }
+
+    abstract function open($path, $name);
+
+    abstract function close();
+
+    abstract function read($id);
+
+    abstract function write($id, $data);
+
+    abstract function destroy($id);
+
+    abstract function gc($lifetime);
+}
+}
+
+namespace Pagon\Session\Store {
+
+use Pagon\Session\Store;
+use Pagon\Session;
+
+
+
+class Cookie extends Store
+{
+    protected $injectors = array(
+        'name' => 'session'
+    );
+
+    public function register(Session $session)
+    {
+        $session->app->output->on('header', function () use ($session) {
+            $session->saveSession();
+        });
+    }
+
+    /*--------------------
+    * Session Handlers
+    ---------------------*/
+
+    public function open($path, $name)
+    {
+        return true;
+    }
+
+    public function close()
+    {
+        return true;
+    }
+
+    public function read($id)
+    {
+        return $this->injectors['app']->input->cookie($this->injectors['name']);
+    }
+
+    public function write($id, $data)
+    {
+        $this->injectors['app']->output->cookie($this->injectors['name'], $data, array('encrypt' => true, 'timeout' => $this->injectors['lifetime']));
+        return true;
+    }
+
+    public function destroy($id)
+    {
+        $this->injectors['app']->output->cookie($this->injectors['name'], '');
+        return true;
+    }
+
+    public function gc($lifetime)
+    {
+        return true;
+    }
+}
+
+
+
+class File extends Store
+{
+    protected $injectors = array(
+        'dir' => '/tmp'
+    );
+
+    /*--------------------
+    * Session Handlers
+    ---------------------*/
+
+    public function open($path, $name)
+    {
+        if (!is_dir($this->injectors['dir'])) {
+            mkdir($this->injectors['dir'], 0777, true);
+        }
+    }
+
+    public function close()
+    {
+        return true;
+    }
+
+    public function read($id)
+    {
+        if (file_exists($this->injectors['dir'] . '/' . $id)) {
+            return file_get_contents($this->injectors['dir'] . '/SESS_' . $id);
+        }
+        return array();
+    }
+
+    public function write($id, $data)
+    {
+        return !!file_put_contents($this->injectors['dir'] . '/SESS_' . $id, $data);
+    }
+
+    public function destroy($id)
+    {
+        return unlink($this->injectors['dir'] . '/' . $id);
+    }
+
+    public function gc($lifetime)
+    {
+        return true;
     }
 }
 
@@ -2625,15 +2960,15 @@ class Output extends EventEmitter
     public function __construct(array $injectors = array())
     {
         parent::__construct($injectors + array(
-            'status'       => 200,
-            'body'         => '',
-            'content_type' => 'text/html',
-            'length'       => false,
-            'charset'      => $injectors['app']->charset,
-            'headers'      => array(),
-            'cookies'      => array(),
-            'app'          => null,
-        ));
+                'status'       => 200,
+                'body'         => '',
+                'content_type' => 'text/html',
+                'length'       => false,
+                'charset'      => $injectors['app']->charset,
+                'headers'      => array(),
+                'cookies'      => array(),
+                'app'          => null,
+            ));
 
         $this->app = & $this->injectors['app'];
         $this->locals = & $this->app->locals;
@@ -2862,7 +3197,7 @@ class Output extends EventEmitter
         if (!$cb) $cookies = array();
 
        
-        $_default = $this->app->cookie;
+        $_default = $this->app->get('cookie');
         if (!$_default) {
             $_default = array(
                 'path'     => '/',
@@ -2894,9 +3229,7 @@ class Output extends EventEmitter
                 $value = 'c:' . $this->app->cryptor->encrypt($value);
             }
 
-            if ($_option['timeout']) {
-                $_option['maxage'] = time() + $_option['timeout'];
-            }
+            $_option['maxage'] = $_option['timeout'] ? time() + $_option['timeout'] : $_option['timeout'];
 
            
             if ($cb) {
