@@ -150,6 +150,10 @@ class Session extends Fiber
                 array($this->injectors['store'], 'destroy'),
                 array($this->injectors['store'], 'gc')
             );
+        } else {
+            $this->injectors['app']->on('end', function () {
+                session_write_close();
+            });
         }
 
         // Send cookie to save id
@@ -159,7 +163,9 @@ class Session extends Fiber
 
         // Start session
         session_id($this->injectors['id']);
-        session_start();
+        if (!session_start()) {
+            throw new \RuntimeException("Session start failed");
+        }
 
         // Get all sessions
         $this->injectors['sessions'] = & $_SESSION;
