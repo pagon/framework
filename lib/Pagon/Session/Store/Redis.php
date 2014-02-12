@@ -1,10 +1,10 @@
 <?php
 
-namespace Pagon\Middleware\Session;
+namespace Pagon\Session\Store;
 
-use Pagon\Middleware\Session;
+use Pagon\Session\Store;
 
-class Redis extends Session
+class Redis extends Store
 {
     protected $injectors = array(
         'host'    => 'localhost',

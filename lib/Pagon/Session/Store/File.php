@@ -1,10 +1,10 @@
 <?php
 
-namespace Pagon\Middleware\Session;
+namespace Pagon\Session\Store;
 
-use Pagon\Middleware\Session;
+use Pagon\Session\Store;
 
-class File extends Session
+class File extends Store
 {
     protected $injectors = array(
         'dir' => '/tmp'
@@ -14,7 +14,7 @@ class File extends Session
     * Session Handlers
     ---------------------*/
 
-    public function open()
+    public function open($path, $name)
     {
         if (!is_dir($this->injectors['dir'])) {
             mkdir($this->injectors['dir'], 0777, true);
@@ -29,14 +29,14 @@ class File extends Session
     public function read($id)
     {
         if (file_exists($this->injectors['dir'] . '/' . $id)) {
-            return unserialize(file_get_contents($this->injectors['dir'] . '/' . $id));
+            return file_get_contents($this->injectors['dir'] . '/SESS_' . $id);
         }
         return array();
     }
 
     public function write($id, $data)
     {
-        return !!file_put_contents($this->injectors['dir'] . '/' . $id, $data);
+        return !!file_put_contents($this->injectors['dir'] . '/SESS_' . $id, $data);
     }
 
     public function destroy($id)

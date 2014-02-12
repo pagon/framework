@@ -92,15 +92,15 @@ class Output extends EventEmitter
     public function __construct(array $injectors = array())
     {
         parent::__construct($injectors + array(
-            'status'       => 200,
-            'body'         => '',
-            'content_type' => 'text/html',
-            'length'       => false,
-            'charset'      => $injectors['app']->charset,
-            'headers'      => array(),
-            'cookies'      => array(),
-            'app'          => null,
-        ));
+                'status'       => 200,
+                'body'         => '',
+                'content_type' => 'text/html',
+                'length'       => false,
+                'charset'      => $injectors['app']->charset,
+                'headers'      => array(),
+                'cookies'      => array(),
+                'app'          => null,
+            ));
 
         $this->app = & $this->injectors['app'];
         $this->locals = & $this->app->locals;
@@ -418,7 +418,7 @@ class Output extends EventEmitter
         if (!$cb) $cookies = array();
 
         // Set cookie
-        $_default = $this->app->cookie;
+        $_default = $this->app->get('cookie');
         if (!$_default) {
             $_default = array(
                 'path'     => '/',
@@ -450,9 +450,7 @@ class Output extends EventEmitter
                 $value = 'c:' . $this->app->cryptor->encrypt($value);
             }
 
-            if ($_option['timeout']) {
-                $_option['maxage'] = time() + $_option['timeout'];
-            }
+            $_option['maxage'] = $_option['timeout'] ? time() + $_option['timeout'] : $_option['timeout'];
 
             // Set cookie
             if ($cb) {
