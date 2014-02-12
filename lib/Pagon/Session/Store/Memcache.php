@@ -1,10 +1,10 @@
 <?php
 
-namespace Pagon\Middleware\Session;
+namespace Pagon\Session\Store;
 
-use Pagon\Middleware\Session;
+use Pagon\Session\Store;
 
-class Memcache extends Session
+class Memcache extends Store
 {
     protected $injectors = array(
         'host'    => 'localhost',
