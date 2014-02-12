@@ -2112,13 +2112,13 @@ class Input extends EventEmitter
     public function __construct(array $injectors = array())
     {
         parent::__construct($injectors + array(
-            'params' => array(),
-            'query'  => &$_GET,
-            'data'   => &$_POST,
-            'files'  => &$_FILES,
-            'server' => &$_SERVER,
-            'app'    => null
-        ));
+                'params' => array(),
+                'query'  => $_GET,
+                'data'   => $_POST,
+                'files'  => $_FILES,
+                'server' => $_SERVER,
+                'app'    => null
+            ));
 
         $this->app = & $this->injectors['app'];
 
@@ -2360,7 +2360,7 @@ class Input extends EventEmitter
                     if (!$value) continue;
 
                    
-                    if (strpos($value, 'c:') === 0) {
+                    if (strpos($value, 'c:') === 0 && $this->app->has('cryptor')) {
                         $value = $this->app->cryptor->decrypt(substr($value, 2));
                     }
 
@@ -3044,9 +3044,17 @@ class Input extends EventEmitter
 {
     public $app;
 
+    protected $injectorsMap = array(
+        'path', 'method', 'body'
+    );
+
     public function __construct(array $injectors = array())
     {
-        parent::__construct($injectors + array('params' => array(), 'app' => null) + $_SERVER);
+        parent::__construct($injectors + array(
+                'params' => array(),
+                'app'    => null,
+                'server' => $_SERVER
+            ));
 
         $this->app = & $this->injectors['app'];
     }
@@ -3061,17 +3069,12 @@ class Input extends EventEmitter
 
     public function path()
     {
-        if (!isset($this->injectors['path_info'])) {
-            if (!empty($GLOBALS['argv'])) {
-                $argv = $GLOBALS['argv'];
-                array_shift($argv);
-                $this->injectors['path_info'] = join(' ', $argv);
-            } else {
-                $this->injectors['path_info'] = '';
-            }
+        if (!empty($GLOBALS['argv'])) {
+            $argv = $GLOBALS['argv'];
+            array_shift($argv);
+            return join(' ', $argv);
         }
-
-        return $this->injectors['path_info'];
+        return '';
     }
 
     public function method()

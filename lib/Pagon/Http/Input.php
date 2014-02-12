@@ -45,13 +45,13 @@ class Input extends EventEmitter
     public function __construct(array $injectors = array())
     {
         parent::__construct($injectors + array(
-            'params' => array(),
-            'query'  => $_GET,
-            'data'   => $_POST,
-            'files'  => $_FILES,
-            'server' => $_SERVER,
-            'app'    => null
-        ));
+                'params' => array(),
+                'query'  => $_GET,
+                'data'   => $_POST,
+                'files'  => $_FILES,
+                'server' => $_SERVER,
+                'app'    => null
+            ));
 
         $this->app = & $this->injectors['app'];
 
@@ -459,7 +459,7 @@ class Input extends EventEmitter
                     if (!$value) continue;
 
                     // Check crypt
-                    if (strpos($value, 'c:') === 0) {
+                    if (strpos($value, 'c:') === 0 && $this->app->has('cryptor')) {
                         $value = $this->app->cryptor->decrypt(substr($value, 2));
                     }
 
