@@ -2,3 +2,4 @@
 *.log
 *.lock
 vendor/
+pack/
