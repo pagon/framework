@@ -1,15 +1,14 @@
 <?php
 
-namespace Pagon\Cli;
+namespace Pagon\Command;
 
-use Pagon\App;
 use Pagon\EventEmitter;
 use Pagon\Exception\Stop;
 
 /**
- * Cli Output
+ * Command Output
  *
- * @package Pagon\Cli
+ * @package Pagon\Command
  * @property \Pagon\App app     Application to service
  * @property int        status
  * @property string     body

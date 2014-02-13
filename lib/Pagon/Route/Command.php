@@ -2,8 +2,8 @@
 
 namespace Pagon\Route;
 
-use Pagon\Cli\Input;
-use Pagon\Cli\Output;
+use Pagon\Command\Input;
+use Pagon\Command\Output;
 use Pagon\Route;
 use Pagon\Utility\ArgParser;
 

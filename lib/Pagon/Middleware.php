@@ -19,12 +19,12 @@ abstract class Middleware extends EventEmitter
     public $app;
 
     /**
-     * @var Http\Input|Cli\Input
+     * @var Http\Input|Command\Input
      */
     public $input;
 
     /**
-     * @var Http\Output|Cli\Output
+     * @var Http\Output|Command\Output
      */
     public $output;
 

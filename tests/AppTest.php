@@ -1,8 +1,8 @@
 <?php
 
 use Pagon\App;
-use Pagon\Cli\Input;
-use Pagon\Cli\Output;
+use Pagon\Command\Input;
+use Pagon\Command\Output;
 
 class AppTest extends PHPUnit_Framework_TestCase
 {

@@ -1,8 +1,7 @@
 <?php
 
-namespace Pagon\Cli;
+namespace Pagon\Command;
 
-use Pagon\App;
 use Pagon\EventEmitter;
 use Pagon\Exception\Pass;
 use Pagon\Config;
@@ -10,7 +9,7 @@ use Pagon\Config;
 /**
  * Cli Input
  *
- * @package Pagon\Cli
+ * @package Pagon\Command
  * @property \Pagon\App app     Application to service
  * @property array      params
  */

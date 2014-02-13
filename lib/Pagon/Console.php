@@ -3,7 +3,7 @@
 namespace Pagon;
 
 /**
- * Cli
+ * Console
  * functional usage for CLI mode
  *
  * @package Pagon

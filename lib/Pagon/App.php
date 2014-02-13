@@ -46,8 +46,8 @@ spl_autoload_register(function ($class) {
  *
  * @package Pagon
  *
- * @property Http\Input|Cli\Input   input        Input of Application
- * @property Http\Output|Cli\Output output       Output of Application
+ * @property Http\Input|Command\Input   input        Input of Application
+ * @property Http\Output|Command\Output output       Output of Application
  * @property Router                 router       Router of Application
  * @property array                  locals       The locals variables to used in template
  * @property string                 mode         Current run mode, Default is "develop"
@@ -127,12 +127,12 @@ class App extends EventEmitter
     );
 
     /**
-     * @var Http\Input|Cli\Input
+     * @var Http\Input|Command\Input
      */
     public $input;
 
     /**
-     * @var Http\Output|Cli\Output
+     * @var Http\Output|Command\Output
      */
     public $output;
 
@@ -166,8 +166,8 @@ class App extends EventEmitter
             $app->input = new Http\Input(array('app' => $app));
             $app->output = new Http\Output(array('app' => $app));
         } else {
-            $app->input = new Cli\Input(array('app' => $app));
-            $app->output = new Cli\Output(array('app' => $app));
+            $app->input = new Command\Input(array('app' => $app));
+            $app->output = new Command\Output(array('app' => $app));
         }
 
         // Init Route
