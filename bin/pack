@@ -4,6 +4,19 @@
 define('PAGON_DIR', dirname(__DIR__));
 define('ROOT_DIR', PAGON_DIR . '/lib');
 
+if (!isset($argv[1])) {
+    echo 'No path given' . PHP_EOL;
+    exit;
+}
+
+$dest_file = $argv[1];
+$dest_dir = dirname($dest_file);
+
+if (!is_dir($dest_dir) && !mkdir($dest_dir, 0777, true)) {
+    echo 'Dir ' . $dest_dir .' can not be created' . PHP_EOL;
+    exit;
+}
+
 $files = array(
     'Pagon/Fiber',
     'Pagon/EventEmitter',
@@ -20,8 +33,8 @@ $files = array(
     'Pagon/Session/Store/File',
     'Pagon/Http/Input',
     'Pagon/Http/Output',
-    'Pagon/Cli/Input',
-    'Pagon/Cli/Output',
+    'Pagon/Command/Input',
+    'Pagon/Command/Output',
     'Pagon/Exception/Pass',
     'Pagon/Exception/Stop'
 );
@@ -75,7 +88,8 @@ foreach ($codes as $namespace => $info) {
     $output .= "\n}\n\n";
 }
 
-file_put_contents(PAGON_DIR . '/pack/pagon.core.php', "<?php\n\n" . $output);
+
+file_put_contents($dest_file, "<?php\n\n" . $output);
 
 function remove_namespace($php)
 {

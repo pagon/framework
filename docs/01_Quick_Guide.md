@@ -21,7 +21,7 @@ $ composer.phar create-project pagon/pagon myapp
 单文件：
 
 ```
-$ wget https://github.com/hfcorriez/pagon/raw/0.8.0-dev/pack/pagon.core.php
+$ wget https://drone.io/github.com/pagon/framework/files/pack/pagon.core.php
 ```
 
 ## 已有项目
