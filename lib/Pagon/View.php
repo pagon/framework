@@ -47,7 +47,7 @@ class View extends EventEmitter
      * @throws \InvalidArgumentException
      * @return mixed
      */
-    public static function factory($type, $data)
+    public static function create($type, $data)
     {
         $class = __NAMESPACE__ . '\\View\\' . ucfirst(strtolower($type));
 

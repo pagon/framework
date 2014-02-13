@@ -7,7 +7,7 @@ use Pagon\Session;
 
 abstract class Store extends Fiber
 {
-    public static function factory($type, array $config = array())
+    public static function create($type, array $config = array())
     {
         if (is_array($type)) {
             $config = $type['config'];

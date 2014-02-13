@@ -17,7 +17,7 @@ abstract class Cache
      * @return mixed
      * @throws \InvalidArgumentException
      */
-    public static function factory($type, $config = array())
+    public static function create($type, $config = array())
     {
         $class = __NAMESPACE__ . '\\Cache\\' . ucfirst(strtolower($type));
 
@@ -40,7 +40,7 @@ abstract class Cache
         if (empty(self::$instances[$name])) {
             $config = App::self()->get($name);
 
-            self::$instances[$name] = self::factory($config['type'], $config);
+            self::$instances[$name] = self::create($config['type'], $config);
         }
 
         return self::$instances[$name];

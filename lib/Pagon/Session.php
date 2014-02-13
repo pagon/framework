@@ -68,7 +68,7 @@ class Session extends Fiber
      * @param array $config
      * @return Session
      */
-    public static function factory(array $config = array())
+    public static function create(array $config = array())
     {
         return new self($config);
     }
@@ -81,7 +81,7 @@ class Session extends Fiber
      */
     public static function start(array $config = array())
     {
-        $session = self::factory($config);
+        $session = self::create($config);
         $session->startSession();
         return $session;
     }
@@ -102,7 +102,7 @@ class Session extends Fiber
 
         // If store is config, create store
         if ($this->injectors['store'] && !$this->injectors['store'] instanceof Store) {
-            $this->injectors['store'] = Store::factory($this->injectors['store']);
+            $this->injectors['store'] = Store::create($this->injectors['store']);
 
             // Set default store if not exists
             if (!self::$defaultStore) {

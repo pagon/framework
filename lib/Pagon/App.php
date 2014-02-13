@@ -681,7 +681,7 @@ class App extends EventEmitter
      */
     public function renderView($view, array $data = null)
     {
-        $this->output->body(View::factory($view, $data));
+        $this->output->body(View::create($view, $data));
     }
 
     /**

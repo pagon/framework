@@ -29,7 +29,7 @@ class CacheTest extends \PHPUnit_Framework_TestCase
 
     public function testFactory()
     {
-        $file = Cache::factory('file');
+        $file = Cache::create('file');
 
         $this->assertInstanceOf('Pagon\Cache\File', $file);
     }
@@ -37,7 +37,7 @@ class CacheTest extends \PHPUnit_Framework_TestCase
     public function testFactoryNonExists()
     {
         $this->setExpectedException('InvalidArgumentException');
-        $none = Cache::factory('none');
+        $none = Cache::create('none');
     }
 
     public function testDispense()
