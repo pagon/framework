@@ -171,7 +171,10 @@ class Router extends Middleware
             $routes = (array)call_user_func($this->injectors['automatic'], $this->injectors['path']);
 
             return $this->handle($routes, function ($route) use ($prefixes) {
-                return Route::build($route, null, $prefixes);
+                try {
+                    return Route::build($route, null, $prefixes);
+                } catch (\Exception $e) {
+                }
             });
         }
 
