@@ -54,8 +54,8 @@ class Console
     /**
      * Print the text
      *
-     * @param string               $text      The text to print
-     * @param string|array|boolean $color     The color or options for display
+     * @param string               $text  The text to print
+     * @param string|array|boolean $color The color or options for display
      * @param bool|string          $auto_br
      */
     public static function log($text, $color = null, $auto_br = true)
@@ -64,10 +64,30 @@ class Console
     }
 
     /**
+     * Done with something
+     *
+     * @param $text
+     */
+    public static function success($text)
+    {
+        self::log($text, 'greenbg');
+    }
+
+    /**
+     * Fail with something
+     *
+     * @param $text
+     */
+    public static function error($text)
+    {
+        self::log($text, 'redbg');
+    }
+
+    /**
      * Color output text for the CLI
      *
-     * @param string               $text      The text to print
-     * @param string|array|boolean $color     The color or options for display
+     * @param string               $text  The text to print
+     * @param string|array|boolean $color The color or options for display
      * @param bool|string          $auto_br
      * @return string
      * @example
@@ -168,9 +188,9 @@ class Console
     /**
      * Interactive mode
      *
-     * @param string        $title      Prompt title
-     * @param \Closure      $cb         Line callback
-     * @param bool|\Closure $auto_br    Auto br or completion function
+     * @param string        $title   Prompt title
+     * @param \Closure      $cb      Line callback
+     * @param bool|\Closure $auto_br Auto br or completion function
      */
     public static function interactive($title, $cb, $auto_br = true)
     {
