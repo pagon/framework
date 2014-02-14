@@ -61,7 +61,7 @@ abstract class Middleware extends EventEmitter
         }
 
         foreach ($prefixes as $namespace) {
-            if (!is_subclass_of($class = ($namespace ? $namespace . '\\' : '') . $route, __CLASS__, true)) continue;
+            if (!class_exists($class = ($namespace ? $namespace . '\\' : '') . $route)) continue;
 
             return new $class((array)$options);
         }

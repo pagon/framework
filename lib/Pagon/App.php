@@ -867,7 +867,7 @@ class App extends EventEmitter
             throw new \InvalidArgumentException('Unknown error type "' . $type . '" to call');
         }
 
-        if (is_string($route) && is_subclass_of($route, Route::_CLASS_, true)
+        if (is_string($route) && class_exists($route)
             || $route instanceof \Closure
         ) {
             // Set error handle

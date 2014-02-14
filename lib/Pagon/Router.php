@@ -171,8 +171,6 @@ class Router extends Middleware
             $routes = (array)call_user_func($this->injectors['automatic'], $this->injectors['path']);
 
             return $this->handle($routes, function ($route) use ($prefixes) {
-                if (!is_subclass_of($route, Middleware::_CLASS_, true)) return false;
-
                 return Route::build($route, null, $prefixes);
             });
         }
