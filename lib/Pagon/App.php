@@ -2,8 +2,8 @@
 /**
  * Pagon Framework
  *
- * @package           Pagon
- * @author            Corrie Zhao <hfcorriez@gmail.com>
+ * @package               Pagon
+ * @author                Corrie Zhao <hfcorriez@gmail.com>
  * @copyright         (c) 2011 - 2013 Pagon Framework
  */
 
@@ -48,25 +48,25 @@ spl_autoload_register(function ($class) {
  *
  * @property Http\Input|Command\Input   input        Input of Application
  * @property Http\Output|Command\Output output       Output of Application
- * @property Router                 router       Router of Application
- * @property array                  locals       The locals variables to used in template
- * @property string                 mode         Current run mode, Default is "develop"
- * @property bool                   debug        Is debug mode enabled?
- * @property string                 views        Views dir
- * @property bool                   error        Handle error
- * @property bool                   buffer       Buffer enabled?
- * @property string                 timezone     Current timezone
- * @property string                 charset      The application charset
- * @property array                  routes       Store the routes for run
- * @property array                  prefixes     The prefixes to mapping the route namespace
- * @property array                  names        Routes names
- * @property string                 autoload     The path to autoload
- * @property array                  namespaces   The namespaces to load with directory path
- * @property array                  alias        The class to alias
- * @property array                  engines      The engines to render template
- * @property array                  errors       Default error handles
- * @property array                  stacks       The middleware stacks to load
- * @property array                  bundles      The bundles to load
+ * @property Router                     router       Router of Application
+ * @property array                      locals       The locals variables to used in template
+ * @property string                     mode         Current run mode, Default is "develop"
+ * @property bool                       debug        Is debug mode enabled?
+ * @property string                     views        Views dir
+ * @property bool                       error        Handle error
+ * @property bool                       buffer       Buffer enabled?
+ * @property string                     timezone     Current timezone
+ * @property string                     charset      The application charset
+ * @property array                      routes       Store the routes for run
+ * @property array                      prefixes     The prefixes to mapping the route namespace
+ * @property array                      names        Routes names
+ * @property string                     autoload     The path to autoload
+ * @property array                      namespaces   The namespaces to load with directory path
+ * @property array                      alias        The class to alias
+ * @property array                      engines      The engines to render template
+ * @property array                      errors       Default error handles
+ * @property array                      stacks       The middleware stacks to load
+ * @property array                      bundles      The bundles to load
  */
 class App extends EventEmitter
 {
@@ -79,6 +79,8 @@ class App extends EventEmitter
          */
         'mode'       => 'develop',
         'debug'      => false,
+        'error'      => true,
+        'exception'  => true,
         'views'      => false,
         'routes'     => array(),
         'prefixes'   => array(),
@@ -755,7 +757,8 @@ class App extends EventEmitter
         $this->injectors['running'] = true;
 
         $_path = $this->input->path();
-        $this->registerErrorHandler();
+
+        if ($this->injectors['error']) set_error_handler(array($this, '__error'));
 
         try {
             // Emit "bundle" event
@@ -834,10 +837,8 @@ class App extends EventEmitter
                 $this->handleError('exception', $e);
             } catch (Exception\Stop $e) {
             }
-            $this->emit('error');
+            $this->emit('error', $e);
         }
-
-        $this->injectors['running'] = false;
 
         // Send start
         $this->emit('flush');
@@ -845,10 +846,11 @@ class App extends EventEmitter
         // Flush
         $this->flush();
 
-        // Send end
-        $this->emit('end');
+        // Cleanup
+        $this->__cleanup();
 
-        $this->restoreErrorHandler();
+        // Set not running
+        $this->injectors['running'] = false;
     }
 
     /**
@@ -857,6 +859,7 @@ class App extends EventEmitter
      * @param string   $type
      * @param callable $route
      * @throws \InvalidArgumentException
+     * @throws \Exception
      */
     public function handleError($type, $route = null)
     {
@@ -867,9 +870,16 @@ class App extends EventEmitter
         if (is_string($route) && is_subclass_of($route, Route::_CLASS_, true)
             || $route instanceof \Closure
         ) {
+            // Set error handle
             $this->injectors['errors'][$type][2] = $route;
+        } else if (!$this->injectors['exception'] && $route instanceof \Exception) {
+            // Not handle exception and throw it
+            throw $route;
         } else {
+            // Clean the output buffer
             ob_get_level() && ob_clean();
+
+            // Check handle route and run it
             if (empty($this->injectors['errors'][$type][2])
                 || !$this->router->run($this->injectors['errors'][$type][2], array('error' => array(
                     'type'    => $type,
@@ -877,25 +887,32 @@ class App extends EventEmitter
                     'message' => $this->injectors['errors'][$type])
                 ))
             ) {
+                /**
+                 * Get error information
+                 */
                 $error = $route instanceof \Exception ? $route : null;
                 $title = $error ? $error->getMessage() : $this->injectors['errors'][$type][1];
                 $code = $this->injectors['errors'][$type][0];
                 $message = $route ? ($error ? $error->getFile() . ' [' . $error->getLine() . ']' : (string)$route) : '';
 
                 if ($this->injectors['cli']) {
+                    // Cli error show
                     $this->halt($code,
                         Console::text('[' . $title . '] ' . ($message ? $message : '"' . $this->input->path() . '"') . ' ', 'redbg') . "\n" .
                         ($this->injectors['debug'] && $error ? Console::text("\n[Error]\n", "yellow") . $error . "\n" : '')
                     );
                 } else {
+                    // Http error show
                     $this->output->status($this->injectors['errors'][$type][0]);
                     if ($this->injectors['debug']) {
+                        // Debug error show
                         $this->renderView('Error', array(
                             'title'   => $title,
                             'message' => $message ? $message : 'Could not ' . $this->input->method() . ' ' . $this->input->path(),
                             'stacks'  => $this->injectors['debug'] && $error ? $error->getTraceAsString() : null
                         ));
                     } else {
+                        // Normal error show
                         $this->renderView('Error', array(
                             'title'   => $title,
                             'message' => $message ? $message : 'Could not ' . $this->input->method() . ' ' . $this->input->path()
@@ -991,25 +1008,6 @@ class App extends EventEmitter
     }
 
     /**
-     * Register error and exception handlers
-     *
-
-     */
-    public function registerErrorHandler()
-    {
-        set_error_handler(array($this, '__error'));
-    }
-
-    /**
-     * Restore error and exception handlers
-     *
-     */
-    public function restoreErrorHandler()
-    {
-        restore_error_handler();
-    }
-
-    /**
      * Auto load class
      *
      * @param string $class
@@ -1087,13 +1085,27 @@ class App extends EventEmitter
     }
 
     /**
+     * Release something
+     */
+    protected function __cleanup()
+    {
+        // Emit "end" event
+        $this->emit('end');
+
+        // Restore error handle if registered
+        if ($this->injectors['error']) restore_error_handler();
+    }
+
+    /**
      * Shutdown handler for app
      */
     public function __shutdown()
     {
+        // Emit "exit" event
         $this->emit('exit');
         if (!$this->injectors['running']) return;
 
+        // Check error and process it
         if (($error = error_get_last())
             && in_array($error['type'], array(E_PARSE, E_ERROR, E_USER_ERROR, E_COMPILE_ERROR, E_CORE_ERROR))
         ) {
@@ -1104,5 +1116,8 @@ class App extends EventEmitter
             $this->emit('crash', $error);
             $this->flush();
         }
+
+        // Cleanup
+        $this->__cleanup();
     }
 }
