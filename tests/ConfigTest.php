@@ -112,13 +112,13 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testString()
     {
-        $string = Config::dump(array('test' => 'abc'), 'json');
+        $string = Config::encode(array('test' => 'abc'), 'json');
         $this->assertEquals('{"test":"abc"}', $string);
     }
 
     public function testDumpUnknownType()
     {
         $this->setExpectedException('InvalidArgumentException');
-        $string = Config::dump(array('test' => 'abc'), 'abc');
+        $string = Config::encode(array('test' => 'abc'), 'abc');
     }
 }

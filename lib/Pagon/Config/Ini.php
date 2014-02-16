@@ -10,7 +10,7 @@ class Ini
      * @param string $ini
      * @return array
      */
-    public static function parse($ini)
+    public static function decode($ini)
     {
         $ini = parse_ini_string($ini);
 
@@ -34,9 +34,9 @@ class Ini
      * @param array $config
      * @return string
      */
-    public static function dump(array $config)
+    public static function encode(array $config)
     {
-        $lines = static::dumpToLines($config);
+        $lines = static::encodeToLines($config);
         $string = '';
         foreach ($lines as $k => $v) {
             $string .= "{$k} = {$v}" . PHP_EOL;
@@ -50,12 +50,12 @@ class Ini
      * @param array $array
      * @return array
      */
-    protected static function dumpToLines($array)
+    protected static function encodeToLines($array)
     {
         $ini_lines = array();
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                foreach (self::dumpToLines($value) as $k => $v) {
+                foreach (self::encodeToLines($value) as $k => $v) {
                     $ini_lines[$key . '.' . $k] = $v;
                 }
             } else {

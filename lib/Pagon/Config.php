@@ -112,7 +112,7 @@ class Config extends Fiber
         }
 
         if ($type !== 'php') {
-            return self::parse(file_get_contents($file), $type);
+            return self::decode(file_get_contents($file), $type);
         } else {
             return include($file);
         }
@@ -127,7 +127,7 @@ class Config extends Fiber
      * @throws \InvalidArgumentException
      * @return array
      */
-    public static function parse($string, $type, array $option = array())
+    public static function decode($string, $type, array $option = array())
     {
         // Try to use custom parser
         if (!class_exists($class = __NAMESPACE__ . "\\Config\\" . ucfirst(strtolower($type)))
@@ -137,7 +137,7 @@ class Config extends Fiber
         }
 
         /** @var $class Config */
-        return $class::parse($string, $option);
+        return $class::decode($string, $option);
     }
 
     /**
@@ -149,7 +149,7 @@ class Config extends Fiber
      * @throws \InvalidArgumentException
      * @return array
      */
-    public static function dump($array, $type, array $option = array())
+    public static function encode($array, $type, array $option = array())
     {
         // Try to use custom parser
         if (!class_exists($class = __NAMESPACE__ . "\\Config\\" . ucfirst(strtolower($type)))
@@ -159,7 +159,7 @@ class Config extends Fiber
         }
 
         /** @var $class Config */
-        return $class::dump($array, $option);
+        return $class::encode($array, $option);
     }
 
     /**
@@ -170,7 +170,7 @@ class Config extends Fiber
      */
     public function string($type)
     {
-        return self::dump($this->injectors, $type);
+        return self::encode($this->injectors, $type);
     }
 
     /**

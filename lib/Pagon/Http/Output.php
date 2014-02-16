@@ -529,7 +529,7 @@ class Output extends EventEmitter
     public function xml($data, array $option = array())
     {
         $this->type('application/xml');
-        $this->body(Xml::dump($data, $option));
+        $this->body(Xml::encode($data, $option));
         return $this;
     }
 

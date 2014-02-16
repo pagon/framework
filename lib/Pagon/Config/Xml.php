@@ -16,7 +16,7 @@ class Xml
      * @param string $content
      * @return array|string
      */
-    public static function parse($content)
+    public static function decode($content)
     {
         $dom = new \DOMDocument();
         $dom->loadXML($content);
@@ -31,7 +31,7 @@ class Xml
      * @param array $option
      * @return string
      */
-    public static function dump($array, $option = array())
+    public static function encode($array, $option = array())
     {
         $option += array(
             'doctype' => '<?xml version="1.0" encoding="utf-8"?>',

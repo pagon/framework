@@ -31,7 +31,7 @@ class RouterTest extends AppTest
         $this->router->map('/', $closure);
 
         $this->assertEquals(
-            array(array('path' => '/', 'route' => $closure, 'via' => null), array('path' => '/', 'route' => $closure, 'via' => null)),
+            array(array('*', '/', $closure), array('*', '/', $closure)),
             $this->app->routes
         );
     }
@@ -42,7 +42,7 @@ class RouterTest extends AppTest
         };
         $this->router->map('/', $closure, 'GET');
         $this->assertEquals(
-            array('path' => '/', 'route' => $closure, 'via' => array('GET')),
+            array('GET', '/', $closure),
             end($this->app->routes)
         );
     }
@@ -53,7 +53,7 @@ class RouterTest extends AppTest
         };
         $this->router->map('/:test', $closure)->rules(array('test' => '[a-z]+'));
         $this->assertEquals(
-            array('path' => '/:test', 'route' => $closure, 'via' => null, 'rules' => array('test' => '[a-z]+')),
+            array('*', '/:test', $closure, 'rules' => array('test' => '[a-z]+')),
             end($this->app->routes)
         );
     }
@@ -64,7 +64,7 @@ class RouterTest extends AppTest
         };
         $this->router->map('/:test', $closure)->defaults(array('test' => 'a'));
         $this->assertEquals(
-            array('path' => '/:test', 'route' => $closure, 'via' => null, 'defaults' => array('test' => 'a')),
+            array('*', '/:test', $closure, 'defaults' => array('test' => 'a')),
             end($this->app->routes)
         );
     }

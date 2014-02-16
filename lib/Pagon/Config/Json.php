@@ -10,7 +10,7 @@ class Json
      * @param string $json
      * @return array
      */
-    public static function parse($json)
+    public static function decode($json)
     {
         return json_decode($json, true);
     }
@@ -21,7 +21,7 @@ class Json
      * @param array $json
      * @return string
      */
-    public static function dump(array $json)
+    public static function encode(array $json)
     {
         return json_encode($json);
     }

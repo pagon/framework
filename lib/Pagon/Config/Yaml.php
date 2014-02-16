@@ -16,7 +16,7 @@ class Yaml
      * @param string $yaml
      * @return array
      */
-    public static function parse($yaml)
+    public static function decode($yaml)
     {
         return YamlParser::parse($yaml);
     }
@@ -27,7 +27,7 @@ class Yaml
      * @param array $array
      * @return string
      */
-    public static function dump(array $array)
+    public static function encode(array $array)
     {
         return YamlParser::dump($array);
     }
