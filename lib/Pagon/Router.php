@@ -56,18 +56,18 @@ class Router extends Middleware
         if (!is_array($route)) {
             // Init route node
             $this->routes[] = array(
-                'path'  => $path,
-                'route' => $route,
-                'via'   => $method == '*' ? null : (array)$method
+                0 => $method,
+                1 => $path,
+                2 => $route,
             );
             $this->last++;
         } else {
             foreach ($route as $r) {
                 // Init route node
                 $this->routes[] = array(
-                    'path'  => $path,
-                    'route' => $r,
-                    'via'   => $method == '*' ? null : (array)$method
+                    0 => $method,
+                    1 => $path,
+                    2 => $r,
                 );
                 $this->last++;
             }
@@ -86,7 +86,7 @@ class Router extends Middleware
     public function name($name, $path = null)
     {
         if ($path === null) {
-            $path = $this->routes[$this->last]['path'];
+            $path = $this->routes[$this->last][1];
         }
 
         $this->app->names[$name] = $path;
@@ -138,10 +138,10 @@ class Router extends Middleware
     public function dispatch()
     {
         // Check path
-        if ($this->injectors['path'] === null) return false;
+        if ($this->injectors[1] === null) return false;
 
         $method = $this->input->method();
-        $path = & $this->injectors['path'];
+        $path = & $this->injectors[1];
         $prefixes = & $this->injectors['prefixes'];
         $app = & $this->app;
 
@@ -153,13 +153,13 @@ class Router extends Middleware
             $defaults = isset($route['defaults']) ? $route['defaults'] : array();
 
             // Try to parse the params
-            if (($params = Router::match($path, $route['path'], $rules, $defaults)) !== false) {
+            if (($params = Router::match($path, $route[1], $rules, $defaults)) !== false) {
                 // Method match
-                if ($route['via'] && !in_array($method, $route['via'])) return false;
+                if ($route[0] && is_string($route[0]) && strpos($route[0], $method) === false && $route[0] !== '*') return false;
 
                 $app->input->params = $params;
 
-                return Route::build($route['route'], null, $prefixes);
+                return Route::build($route[2], null, $prefixes);
             }
             return false;
         })
@@ -168,7 +168,7 @@ class Router extends Middleware
 
         // Try to check automatic route parser
         if (isset($this->injectors['automatic']) && is_callable($this->injectors['automatic'])) {
-            $routes = (array)call_user_func($this->injectors['automatic'], $this->injectors['path']);
+            $routes = (array)call_user_func($this->injectors['automatic'], $this->injectors[1]);
 
             return $this->handle($routes, function ($route) use ($prefixes) {
                 try {
@@ -243,12 +243,12 @@ class Router extends Middleware
     public function call()
     {
         $prefixes = array();
-        $this->injectors['path'] = $this->app->input->path();
+        $this->injectors[1] = $this->app->input->path();
 
         // Prefixes Lookup
         if ($this->app->prefixes) {
             foreach ($this->app->prefixes as $path => $namespace) {
-                if (strpos($this->injectors['path'], $path) === 0) {
+                if (strpos($this->injectors[1], $path) === 0) {
                     $prefixes[99 - strlen($path)] = $namespace;
                 }
             }
