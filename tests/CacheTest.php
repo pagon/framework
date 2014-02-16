@@ -15,7 +15,7 @@ class CacheTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->app = App::create(array(
+        $this->app = Pagon::create(array(
             'cache' => array(
                 'user' => array(
                     'type' => 'file',

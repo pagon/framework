@@ -1,6 +1,6 @@
 <?php
 
-use Pagon\App;
+use Pagon\Pagon;
 use Pagon\Command\Input;
 use Pagon\Command\Output;
 
@@ -13,7 +13,7 @@ class AppTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->app = App::create(array(
+        $this->app = Pagon::create(array(
             'my'     => 'test',
             'en'     => false,
             'mt'     => array(

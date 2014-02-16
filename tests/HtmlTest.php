@@ -13,7 +13,7 @@ class HtmlTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->app = App::create();
+        $this->app = Pagon::create();
         $_SERVER = array(
             'HTTP_HOST'            => 'localhost',
             'HTTP_CONNECTION'      => 'keep-alive',

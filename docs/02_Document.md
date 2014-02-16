@@ -103,7 +103,7 @@ url_rewrite 是否开启Url rewrite
 ## 配置应用
 
 ```php
-$app = App::create(array(
+$app = Pagon::create(array(
 	'timezone' => 'Asia/Shanghai',
 	'debug' =>  true,
 	'cookie' => array(
@@ -161,7 +161,7 @@ return array(
 ## 注入配置
 
 ```
-$app = App::create('config.json');
+$app = Pagon::create('config.json');
 ```
 
 # 中间件
@@ -215,7 +215,7 @@ $app->add('/monitor', 'HttpBasicAuth', array('username' => 'test', 'password' =>
 环境配置可以通过环境变量`PAGON_ENV`来设置，默认为`develop`
 
 ```php
-$app = App::create();
+$app = Pagon::create();
 
 // 获取当前环境
 $app->mode();

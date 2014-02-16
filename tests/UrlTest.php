@@ -13,7 +13,7 @@ class UrlTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->app = App::create(array(
+        $this->app = Pagon::create(array(
             'site_url'  => 'http://apple.com/test',
             'asset_url' => 'http://cdn.apple.com'
         ));
