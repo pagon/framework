@@ -153,7 +153,7 @@ class Router extends Middleware
             $defaults = isset($route['defaults']) ? $route['defaults'] : array();
 
             // Try to parse the params
-            if (($params = Router::match($path, $route[1], $rules, $defaults)) !== false) {
+            if (($params = Router::match($path, $route[1] . ($app->cli ? '(:args)' : ''), $rules, $defaults)) !== false) {
                 // Method match
                 if ($route[0] && is_string($route[0]) && strpos($route[0], $method) === false && $route[0] !== '*') return false;
 

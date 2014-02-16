@@ -439,9 +439,9 @@ class App extends EventEmitter
         }
 
         if ($more !== null) {
-            return $this->router->map($path . '( :args)', array_slice(func_get_args(), 1), "CLI");
+            return $this->router->map($path, array_slice(func_get_args(), 1), "CLI");
         } else {
-            return $this->router->map($path . '( :args)', $route, "CLI");
+            return $this->router->map($path, $route, "CLI");
         }
     }
 
