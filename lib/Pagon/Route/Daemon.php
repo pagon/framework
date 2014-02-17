@@ -23,7 +23,7 @@ abstract class Daemon extends Route
     public function call()
     {
         if (!$this->app->cli()) {
-            throw new \RuntimeException("Daemon route can used under the CLI mode only!");
+            throw new \RuntimeException("Daemon route only work under the CLI mode!");
         }
 
         $this->before();

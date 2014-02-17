@@ -25,7 +25,7 @@ abstract class Command extends Route
     public function call()
     {
         if (!$this->app->cli()) {
-            throw new \RuntimeException("Daemon route can used under the CLI mode only!");
+            throw new \RuntimeException("Command route only work under the CLI mode!");
         }
 
         $argv = $GLOBALS['argv'];

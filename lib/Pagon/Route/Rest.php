@@ -46,7 +46,7 @@ abstract class Rest extends Route
         $this->params = $this->input->params;
 
         if ($this->app->cli()) {
-            throw new \RuntimeException("Daemon route can not use under the CLI mode!");
+            throw new \RuntimeException("Rest route can not work under the CLI mode!");
         }
 
         $method = strtolower($this->input->method());
