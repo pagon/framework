@@ -192,17 +192,20 @@ class Router extends Middleware
     {
         array_unshift($routes, null);
 
+        $app = $this->app;
+
         $arguments = array(
             $this->app->input,
             $this->app->output,
-            function () use (&$routes, $mapper, &$arguments) {
+            function () use (&$routes, $mapper, &$arguments, $app) {
                 while ($route = next($routes)) {
                     if ($route = $mapper($route)) break;
                 }
 
                 if (!$route) throw new Pass;
 
-                call_user_func_array($route, $arguments);
+                $app->output->write(call_user_func_array($route, $arguments));
+
                 return true;
             }
         );

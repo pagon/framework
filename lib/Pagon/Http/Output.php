@@ -132,6 +132,8 @@ class Output extends EventEmitter
      */
     public function write($data)
     {
+        if (!$data) return $this;
+
         $this->injectors['body'] .= $data;
         $this->injectors['length'] += strlen($data);
 
