@@ -47,7 +47,7 @@ class Logger extends Logger\LoggerInterface
      * @param string $key Default key is "log"
      * @return Logger
      */
-    public static function dispense($key = 'log')
+    public static function with($key = 'log')
     {
         if (empty(self::$instances[$key])) {
             self::$instances[$key] = new self(App::self()->get($key));

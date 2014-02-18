@@ -248,7 +248,7 @@ function compile($path, array $data = null, array $options = array())
  */
 function logger($name = 'log')
 {
-    return Logger::dispense($name);
+    return Logger::with($name);
 }
 
 /**

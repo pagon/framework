@@ -5,7 +5,6 @@
 
 namespace Pagon;
 
-
 class CacheTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -42,11 +41,11 @@ class CacheTest extends \PHPUnit_Framework_TestCase
 
     public function testDispense()
     {
-        $user_cache = Cache::dispense('cache.user');
+        $user_cache = Cache::with('cache.user');
 
         $this->assertInstanceOf('Pagon\Cache\File', $user_cache);
 
-        $try_new_cache = Cache::dispense('cache.user');
+        $try_new_cache = Cache::with('cache.user');
 
         $this->assertEquals($try_new_cache, $user_cache);
     }
@@ -54,6 +53,6 @@ class CacheTest extends \PHPUnit_Framework_TestCase
     public function testDispenseNonExists()
     {
         $this->setExpectedException('InvalidArgumentException');
-        $user_cache = Cache::dispense('cache.user1');
+        $user_cache = Cache::with('cache.user1');
     }
 }

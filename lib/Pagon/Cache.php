@@ -35,7 +35,7 @@ abstract class Cache
      * @return Cache
      * @throws \InvalidArgumentException
      */
-    public static function dispense($name = 'cache')
+    public static function with($name = 'cache')
     {
         if (empty(self::$instances[$name])) {
             $config = App::self()->get($name);
