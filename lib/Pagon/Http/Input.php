@@ -357,10 +357,7 @@ class Input extends EventEmitter
      */
     public function query($key, $default = null)
     {
-        if (isset($this->injectors['query'][$key])) {
-            return $this->app->enabled('safe_query') && View::$rendering ? Html::encode($this->injectors['query'][$key]) : $this->injectors['query'][$key];
-        }
-        return $default;
+        return isset($this->injectors['query'][$key]) ? $this->injectors['query'][$key] : $default;
     }
 
     /**
@@ -372,10 +369,7 @@ class Input extends EventEmitter
      */
     public function data($key, $default = null)
     {
-        if (isset($this->injectors['data'][$key])) {
-            return $this->app->enabled('safe_query') && View::$rendering ? Html::encode($this->injectors['data'][$key]) : $this->injectors['data'][$key];
-        }
-        return $default;
+        return isset($this->injectors['query'][$key]) ? $this->injectors['query'][$key] : $default;
     }
 
     /**

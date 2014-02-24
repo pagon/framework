@@ -13,13 +13,6 @@ class View extends EventEmitter
     const _CLASS_ = __CLASS__;
 
     /**
-     * Is Rendering now?
-     *
-     * @var bool
-     */
-    public static $rendering = false;
-
-    /**
      * @var string File path
      */
     protected $path;
@@ -140,9 +133,6 @@ class View extends EventEmitter
      */
     public function render()
     {
-        // Mark rendering flag
-        self::$rendering = true;
-
         $this->emit('render');
 
         $er_code = error_reporting(E_ALL & ~E_NOTICE);
@@ -168,9 +158,6 @@ class View extends EventEmitter
         error_reporting($er_code);
 
         $this->emit('rendered');
-
-        // Release rendering flag
-        self::$rendering = false;
 
         return $__html;
     }

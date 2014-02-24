@@ -81,7 +81,6 @@ class App extends EventEmitter
             'update'  => array('PUT', ':id'),
             'destroy' => array('DELETE', ':id')
         ),
-        'safe_query' => true,
 
         /**
          * Main dependencies
