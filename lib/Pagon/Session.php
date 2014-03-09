@@ -8,6 +8,13 @@ use Pagon\Session\Store;
  * Class Session
  *
  * @property \Pagon\App $app
+ * @method  has(string $key)
+ * @method  get(string $key)
+ * @method  set(string $key)
+ * @method  all(string $key)
+ * @method  save(string $key)
+ * @method  clear(string $key)
+ * @method  destroy(string $key)
  * @package Pagon
  */
 class Session extends Fiber implements \ArrayAccess, \Countable, \Iterator
@@ -70,7 +77,9 @@ class Session extends Fiber implements \ArrayAccess, \Countable, \Iterator
     /**
      * Factory a session
      *
-     * @param array $config
+     * @param string|array $type
+     * @param array        $config
+     * @throws \InvalidArgumentException
      * @return Session
      */
     public static function create($type, $config = array())
@@ -89,7 +98,8 @@ class Session extends Fiber implements \ArrayAccess, \Countable, \Iterator
     /**
      * Start session
      *
-     * @param array $config
+     * @param string|array $type
+     * @param array        $config
      * @return Session
      */
     public static function start($type, $config = null)
@@ -275,7 +285,7 @@ class Session extends Fiber implements \ArrayAccess, \Countable, \Iterator
     /**
      * Clear all session
      */
-    public function clear()
+    public function clearSession()
     {
         $this->injectors['sessions'] = array();
     }
@@ -292,7 +302,7 @@ class Session extends Fiber implements \ArrayAccess, \Countable, \Iterator
         } else if ($this->injectors['store']) {
             $this->injectors['store']->destroy($this->injectors['id']);
         } else {
-            $this->clear();
+            $this->clearSession();
         }
     }
 
