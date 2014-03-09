@@ -16,6 +16,11 @@ use Pagon\View;
  * @property array      params
  * @property array      query
  * @property array      data
+ * @property array      files
+ * @property array      cookies
+ * @property array      server
+ * @property array      sessions
+ * @property array      headers
  */
 class Input extends EventEmitter
 {
@@ -28,10 +33,9 @@ class Input extends EventEmitter
      * @var array Mapping
      */
     protected $injectorsMap = array(
-        'headers'  => 'header',
-        'cookies'  => 'cookie',
-        'sessions' => 'session',
-        'base'     => 'scriptName',
+        'headers' => 'header',
+        'cookies' => 'cookie',
+        'base'    => 'scriptName',
         'path', 'domain', 'protocol',
         'scheme', 'uri', 'url',
         'site', 'proxy', 'ip',
@@ -45,12 +49,14 @@ class Input extends EventEmitter
     public function __construct(array $injectors = array())
     {
         parent::__construct($injectors + array(
-                'params' => array(),
-                'query'  => $_GET,
-                'data'   => $_POST,
-                'files'  => $_FILES,
-                'server' => $_SERVER,
-                'app'    => null
+                'params'   => array(),
+                'query'    => $_GET,
+                'data'     => $_POST,
+                'files'    => $_FILES,
+                'server'   => $_SERVER,
+                '_cookies' => $_COOKIE, // Cookies need to process.
+                'sessions' => $_SESSION,
+                'app'      => null
             ));
 
         $this->app = & $this->injectors['app'];
@@ -445,7 +451,7 @@ class Input extends EventEmitter
     public function cookie($key = null, $default = null)
     {
         if ($key === null) {
-            $_cookies = $_COOKIE;
+            $_cookies = $this->injectors['_cookies'];
             $_option = $this->app->get('cookie');
 
             if ($_option) {
@@ -491,12 +497,12 @@ class Input extends EventEmitter
     public function session($key = null, $value = null)
     {
         if ($value !== null) {
-            return $_SESSION[$key] = $value;
+            return $this->injectors['sessions'][$key] = $value;
         } elseif ($key !== null) {
-            return isset($_SESSION[$key]) ? $_SESSION[$key] : null;
+            return isset($this->injectors['sessions'][$key]) ? $this->injectors['sessions'][$key] : null;
         }
 
-        return $_SESSION;
+        return $this->injectors['sessions'];
     }
 
     /**
