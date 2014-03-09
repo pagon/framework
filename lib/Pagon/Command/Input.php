@@ -12,6 +12,10 @@ use Pagon\Config;
  * @package Pagon\Command
  * @property \Pagon\App app     Application to service
  * @property array      params
+ * @property array      server
+ * @property string     path
+ * @property string     method
+ * @property string     body
  */
 class Input extends EventEmitter
 {

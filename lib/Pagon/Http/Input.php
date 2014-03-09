@@ -21,6 +21,23 @@ use Pagon\View;
  * @property array      server
  * @property array      sessions
  * @property array      headers
+ * @property string     path
+ * @property string     method
+ * @property string     body
+ * @property string     base
+ * @property string     domain
+ * @property string     protocol
+ * @property string     schema
+ * @property string     uri
+ * @property string     url
+ * @property string     site
+ * @property string     ip
+ * @property array      proxy
+ * @property string     refer
+ * @property string     ua
+ * @property string     type
+ * @property string     charset
+ * @property string     length
  */
 class Input extends EventEmitter
 {
