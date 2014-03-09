@@ -211,7 +211,7 @@ class Session extends Fiber implements \ArrayAccess, \Countable, \Iterator
             }
         }
 
-        // Reigster save session when app finished
+        // Register save session when app finished
         $session = $this;
         $this->injectors['app']->on('end', function () use ($session) {
             $session->saveSession();
