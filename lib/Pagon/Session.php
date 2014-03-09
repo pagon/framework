@@ -319,7 +319,7 @@ class Session extends Fiber implements \ArrayAccess, \Countable, \Iterator
     }
 
     /*
-     * Magin method to make helpful usable.
+     * Magic methods to make easy usable.
      */
 
     public static function __callStatic($method, $args)
