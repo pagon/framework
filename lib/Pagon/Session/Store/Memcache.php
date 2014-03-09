@@ -22,7 +22,7 @@ class Memcache extends Store
     * Session Handlers
     ---------------------*/
 
-    public function open($path, $name)
+    public function open($path = null, $name = null)
     {
         if (!class_exists('\Memcache')) {
             throw new \RuntimeException("Use Session\Memcache need memcache extension installed.");

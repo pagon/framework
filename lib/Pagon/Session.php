@@ -10,7 +10,7 @@ use Pagon\Session\Store;
  * @property \Pagon\App $app
  * @package Pagon
  */
-class Session extends Fiber
+class Session extends Fiber implements \ArrayAccess, \Countable, \Iterator
 {
     /**
      * @var Session\Store Default store for new instance
@@ -52,6 +52,11 @@ class Session extends Fiber
         'destroyed'  => false,
 
         /**
+         * Register to global?
+         */
+        'global'     => false,
+
+        /**
          * Has been started?
          */
         'started'    => false,
@@ -68,8 +73,16 @@ class Session extends Fiber
      * @param array $config
      * @return Session
      */
-    public static function create(array $config = array())
+    public static function create($type, $config = array())
     {
+        if (is_string($type)) {
+            $config['store'] = $type;
+        } else if (is_array($type)) {
+            $config = $type;
+        } else {
+            throw new \InvalidArgumentException("Unknown arguments to create session");
+        }
+
         return new self($config);
     }
 
@@ -79,9 +92,9 @@ class Session extends Fiber
      * @param array $config
      * @return Session
      */
-    public static function start(array $config = array())
+    public static function start($type, $config = null)
     {
-        $session = self::create($config);
+        $session = self::create($type, $config);
         $session->startSession();
         return $session;
     }
@@ -124,10 +137,13 @@ class Session extends Fiber
         // Session name
         $name = session_name();
 
+        // Get cookies
+        $cookies = $this->injectors['app']->input->cookies;
+
         // Check id and generate
         if (!$this->injectors['id']) {
-            if (isset($_COOKIE[$name])) {
-                $this->injectors['id'] = $_COOKIE[$name];
+            if (isset($cookies[$name])) {
+                $this->injectors['id'] = $cookies[$name];
             } else {
                 $this->injectors['id'] = sha1(microtime(true) . rand(1000, 9999));
             }
@@ -137,38 +153,64 @@ class Session extends Fiber
         ini_set('session.use_cookies', 0);
         session_cache_limiter(false);
 
+        // Register sessions
+        $this->injectors['sessions'] = & $this->injectors['app']->input->sessions;
+
         // Support store
         if ($this->injectors['store']) {
             $this->injectors['store']->register($this);
             $this->injectors['store']->app = $this->injectors['app'];
 
-            session_set_save_handler(
-                array($this->injectors['store'], 'open'),
-                array($this->injectors['store'], 'close'),
-                array($this->injectors['store'], 'read'),
-                array($this->injectors['store'], 'write'),
-                array($this->injectors['store'], 'destroy'),
-                array($this->injectors['store'], 'gc')
-            );
+            if ($this->injectors['global']) {
+                session_set_save_handler(
+                    array($this->injectors['store'], 'open'),
+                    array($this->injectors['store'], 'close'),
+                    array($this->injectors['store'], 'read'),
+                    array($this->injectors['store'], 'write'),
+                    array($this->injectors['store'], 'destroy'),
+                    array($this->injectors['store'], 'gc')
+                );
+
+                // Start session
+                session_id($this->injectors['id']);
+                if (!session_start()) {
+                    throw new \RuntimeException("Session start failed");
+                }
+
+                // Get all sessions
+                $this->injectors['sessions'] = & $_SESSION;
+            } else {
+                $this->injectors['store']->open();
+
+                $this->injectors['sessions']
+                    = unserialize($this->injectors['store']->read($this->injectors['id']));
+
+                // @TODO GC and Destroy
+            }
         } else {
-            $this->injectors['app']->on('end', function () {
-                session_write_close();
-            });
+            if ($this->injectors['global']) {
+                // Start session
+                session_id($this->injectors['id']);
+                if (!session_start()) {
+                    throw new \RuntimeException("Session start failed");
+                }
+
+                $this->injectors['sessions'] = & $_SESSION;
+            } else {
+                $this->injectors['sessions'] = array();
+            }
         }
+
+        // Reigster save session when app finished
+        $session = $this;
+        $this->injectors['app']->on('end', function () use ($session) {
+            $session->saveSession();
+        });
 
         // Send cookie to save id
-        if (!isset($_COOKIE[$name])) {
+        if (!isset($cookies[$name])) {
             $this->injectors['app']->output->cookie($name, $this->injectors['id']);
         }
-
-        // Start session
-        session_id($this->injectors['id']);
-        if (!session_start()) {
-            throw new \RuntimeException("Session start failed");
-        }
-
-        // Get all sessions
-        $this->injectors['sessions'] = & $_SESSION;
 
         // Flat to started
         $this->injectors['started'] = true;
@@ -245,7 +287,13 @@ class Session extends Fiber
      */
     public function destroySession()
     {
-        session_destroy();
+        if ($this->injectors['global']) {
+            session_destroy();
+        } else if ($this->injectors['store']) {
+            $this->injectors['store']->destroy($this->injectors['id']);
+        } else {
+            $this->clear();
+        }
     }
 
     /**
@@ -253,8 +301,16 @@ class Session extends Fiber
      */
     public function saveSession()
     {
-        session_write_close();
+        if ($this->injectors['global']) {
+            session_write_close();
+        } else if ($this->injectors['store']) {
+            $this->injectors['store']->write($this->injectors['id'], serialize($this->injectors['sessions']));
+        }
     }
+
+    /*
+     * Magin method to make helpful usable.
+     */
 
     public static function __callStatic($method, $args)
     {
@@ -269,4 +325,66 @@ class Session extends Fiber
     {
         return call_user_func_array(array($this, $method . 'Session'), $args);
     }
-} 
+
+    /*
+     * Array access to use such as $_SESSION
+     */
+
+    public function offsetGet($offset)
+    {
+        return $this->getSession($offset);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->setSession($offset, $value);
+    }
+
+    public function offsetExists($offset)
+    {
+        return $this->hasSession($offset);
+    }
+
+    public function offsetUnset($offset)
+    {
+        $this->deleteSession($offset);
+    }
+
+    /*
+     * Object intance can be countable
+     */
+
+    public function count()
+    {
+        return count($this->injectors['sessions']);
+    }
+
+    /*
+     * Object instance can be loop with foreach
+     */
+
+    public function rewind()
+    {
+        reset($this->injectors['sessions']);
+    }
+
+    public function current()
+    {
+        return current($this->injectors['sessions']);
+    }
+
+    public function key()
+    {
+        return key($this->injectors['sessions']);
+    }
+
+    public function next()
+    {
+        next($this->injectors['sessions']);
+    }
+
+    public function valid()
+    {
+        return current($this->injectors['sessions']) !== false;
+    }
+}

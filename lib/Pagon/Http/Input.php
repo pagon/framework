@@ -55,9 +55,11 @@ class Input extends EventEmitter
                 'files'    => $_FILES,
                 'server'   => $_SERVER,
                 '_cookies' => $_COOKIE, // Cookies need to process.
-                'sessions' => $_SESSION,
                 'app'      => null
             ));
+
+        if (isset($_SESSION)) $this->injectors['sessions'] = & $_SESSION;
+        else $this->injectors['sessions'] = array();
 
         $this->app = & $this->injectors['app'];
 

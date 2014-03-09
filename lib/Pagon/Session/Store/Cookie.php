@@ -22,7 +22,7 @@ class Cookie extends Store
     * Session Handlers
     ---------------------*/
 
-    public function open($path, $name)
+    public function open($path = null, $name = null)
     {
         return true;
     }

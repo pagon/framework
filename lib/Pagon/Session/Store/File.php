@@ -14,7 +14,7 @@ class File extends Store
     * Session Handlers
     ---------------------*/
 
-    public function open($path, $name)
+    public function open($path = null, $name = null)
     {
         if (!is_dir($this->injectors['dir'])) {
             mkdir($this->injectors['dir'], 0777, true);
@@ -28,10 +28,10 @@ class File extends Store
 
     public function read($id)
     {
-        if (file_exists($this->injectors['dir'] . '/' . $id)) {
+        if (file_exists($this->injectors['dir'] . '/SESS_' . $id)) {
             return file_get_contents($this->injectors['dir'] . '/SESS_' . $id);
         }
-        return array();
+        return "";
     }
 
     public function write($id, $data)

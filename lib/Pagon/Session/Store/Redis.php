@@ -22,7 +22,7 @@ class Redis extends Store
     * Session Handlers
     ---------------------*/
 
-    public function open($path, $name)
+    public function open($path = null, $name = null)
     {
         if (!class_exists('\Redis')) {
             throw new \RuntimeException("Use Session\Redis need redis extension installed.");
