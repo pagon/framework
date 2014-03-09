@@ -10,11 +10,12 @@ use Pagon\Session\Store;
  * @property \Pagon\App $app
  * @method  has(string $key)
  * @method  get(string $key)
- * @method  set(string $key)
- * @method  all(string $key)
- * @method  save(string $key)
- * @method  clear(string $key)
- * @method  destroy(string $key)
+ * @method  set(string $key, mixed $value)
+ * @method  delete(string $key)
+ * @method  all()
+ * @method  save()
+ * @method  clear()
+ * @method  destroy()
  * @package Pagon
  */
 class Session extends Fiber implements \ArrayAccess, \Countable, \Iterator
