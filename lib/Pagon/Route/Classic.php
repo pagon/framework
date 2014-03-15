@@ -44,18 +44,34 @@ use Pagon\Route;
  */
 abstract class Classic extends Route
 {
+    /**
+     * Default action if not action assign
+     *
+     * @var string
+     */
+    protected $default_action = 'index';
+
+    /**
+     * Action prefix for method name
+     *
+     * @var string
+     */
+    protected $action_prefix = 'action';
+
     public function call()
     {
         // Set params
         $this->params = $this->input->params;
 
-        $action = $this->input->param('action');
-
-        if (!$action) {
-            throw new \RuntimeException('Route need ":action" param');
+        // Set action
+        if (!$action = $this->input->param('action')) {
+            $action = $this->default_action;
         }
 
-        $method = 'action' . $action;
+        // Set method name
+        if (!$method = $this->action_prefix . $action) {
+            throw new \InvalidArgumentException("Action must be specified");
+        }
 
         // Check method
         $this->before();
