@@ -292,7 +292,7 @@ class Router extends Middleware
         }
 
         // When complete the return
-        return $param === false ? false : ($defaults + $param);
+        return $param === false ? false : ($param + $defaults);
     }
 
     /**
