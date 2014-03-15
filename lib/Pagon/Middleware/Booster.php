@@ -38,12 +38,5 @@ class Booster extends Middleware
         if ($_log = $app->get($this->injectors['logger'])) {
             $app->logger = Logger::$default = new Logger($_log);
         }
-
-        // Configure debug
-        if ($app->debug) {
-            self::graft('PrettyException');
-        } else {
-            $this->next();
-        }
     }
 }

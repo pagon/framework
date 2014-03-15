@@ -70,25 +70,6 @@ abstract class Middleware extends EventEmitter
     }
 
     /**
-     * Graft the route inner
-     *
-     * @param \Closure|string $route
-     * @param array           $option
-     * @throws \RuntimeException
-     * @return mixed
-     */
-    public function graft($route, array $option = array())
-    {
-        if (!$route = self::build($route, $option)) {
-            throw new \RuntimeException("Graft \"$route\" fail");
-        }
-
-        return call_user_func_array($route, array(
-            $this->input, $this->output, $this->next
-        ));
-    }
-
-    /**
      * @return mixed
      */
     abstract function call();
