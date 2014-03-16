@@ -10,10 +10,10 @@ use Pagon\Exception\Stop;
  * parse and manage the Route
  *
  * @package Pagon
- * @property App      app       Application to service
- * @property string   path      The current path
- * @property string   base      The base path
- * @property \Closure automatic Automatic closure for auto route
+ * @property App      app           Application to service
+ * @property string   path          The current path
+ * @property string   bundle_path   The base path
+ * @property \Closure automatic     Automatic closure for auto route
  */
 class Router extends Middleware
 {
@@ -34,8 +34,13 @@ class Router extends Middleware
      */
     protected $last = -1;
 
+    /**
+     * Defaults
+     *
+     * @var array
+     */
     protected $injectors = array(
-        'base' => ''
+        'bundle_path' => ''
     );
 
     /**
@@ -59,7 +64,9 @@ class Router extends Middleware
     public function map($path, $route, $method = '*')
     {
         // Support base inject
-        $path = $this->injectors['base'] . $path;
+        if ($this->injectors['bundle_path']) {
+            $path = str_replace('{bundle}', $this->injectors['bundle_path'], $path);
+        }
 
         if (!is_array($route)) {
             // Init route node

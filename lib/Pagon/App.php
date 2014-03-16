@@ -719,13 +719,6 @@ class App extends EventEmitter
                 // Set dir to load
                 $dir = isset($options['dir']) ? $options['dir'] : 'bundles/' . $id;
 
-                // Path check, if not match start of path, skip
-                if (isset($options['path'])
-                    && strpos($_path, $options['path']) !== 0
-                ) {
-                    continue;
-                }
-
                 // Check the file path
                 if (!$file = $this->path($dir . '/' . $bootstrap)) {
                     throw new \InvalidArgumentException('Bundle "' . $id . '" can not bootstrap');
@@ -739,12 +732,9 @@ class App extends EventEmitter
                 // Emit "bundle.[id]" event
                 $this->emit('bundle.' . $id);
 
-                // Check path and set base
-                $_base = '';
-                if (!empty($options['path'])) {
-                    $_base = $this->router->base;
-                    $this->router->base = $options['path'];
-                }
+                // Check path and set bundle path
+                $_bundle_path = $this->router->bundle_path;
+                $this->router->bundle_path = !empty($options['path']) ? $options['path'] : '/' . $id;
 
                 // Set variable for bootstrap file
                 $app = $this;
@@ -755,10 +745,8 @@ class App extends EventEmitter
                 // Include file to bootstrap
                 require $file;
 
-                // Restore the base
-                if ($_base) {
-                    $this->router->base = $_base;
-                }
+                // Restore the bundle path
+                if ($_bundle_path) $this->router->bundle_path = $_bundle_path;
 
                 // Save to loads
                 self::$loads[$file] = true;
