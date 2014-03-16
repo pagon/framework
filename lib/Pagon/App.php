@@ -739,10 +739,26 @@ class App extends EventEmitter
                 // Emit "bundle.[id]" event
                 $this->emit('bundle.' . $id);
 
+                // Check path and set base
+                $_base = '';
+                if (!empty($options['path'])) {
+                    $_base = $this->router->base;
+                    $this->router->base = $options['path'];
+                }
+
                 // Set variable for bootstrap file
                 $app = $this;
+
+                // Extract the variables
                 extract($options);
+
+                // Include file to bootstrap
                 require $file;
+
+                // Restore the base
+                if ($_base) {
+                    $this->router->base = $_base;
+                }
 
                 // Save to loads
                 self::$loads[$file] = true;

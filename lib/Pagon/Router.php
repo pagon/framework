@@ -12,6 +12,7 @@ use Pagon\Exception\Stop;
  * @package Pagon
  * @property App      app       Application to service
  * @property string   path      The current path
+ * @property string   base      The base path
  * @property \Closure automatic Automatic closure for auto route
  */
 class Router extends Middleware
@@ -33,12 +34,16 @@ class Router extends Middleware
      */
     protected $last = -1;
 
+    protected $injectors = array(
+        'base' => ''
+    );
+
     /**
      * @param array $injectors
      */
     public function __construct(array $injectors = array())
     {
-        parent::__construct($injectors);
+        parent::__construct($injectors + $this->injectors);
         $this->app = & $this->injectors['app'];
         $this->routes = & $this->app->routes;
     }
@@ -53,22 +58,17 @@ class Router extends Middleware
      */
     public function map($path, $route, $method = '*')
     {
+        // Support base inject
+        $path = $this->injectors['base'] . $path;
+
         if (!is_array($route)) {
             // Init route node
-            $this->routes[] = array(
-                0 => $method,
-                1 => $path,
-                2 => $route,
-            );
+            $this->routes[] = array($method, $path, $route);
             $this->last++;
         } else {
             foreach ($route as $r) {
                 // Init route node
-                $this->routes[] = array(
-                    0 => $method,
-                    1 => $path,
-                    2 => $r,
-                );
+                $this->routes[] = array($method, $path, $r);
                 $this->last++;
             }
         }
