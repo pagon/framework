@@ -50,9 +50,10 @@ class Input extends EventEmitter
      * @var array Mapping
      */
     protected $injectorsMap = array(
-        'headers' => 'header',
-        'cookies' => 'cookie',
-        'base'    => 'scriptName',
+        'headers'  => 'header',
+        'cookies'  => 'cookie',
+        'sessions' => 'session',
+        'base'     => 'scriptName',
         'path', 'domain', 'protocol',
         'scheme', 'uri', 'url',
         'site', 'proxy', 'ip',
@@ -74,9 +75,6 @@ class Input extends EventEmitter
                 '_cookies' => $_COOKIE, // Cookies need to process.
                 'app'      => null
             ));
-
-        if (isset($_SESSION)) $this->injectors['sessions'] = & $_SESSION;
-        else $this->injectors['sessions'] = array();
 
         $this->app = & $this->injectors['app'];
 
@@ -511,15 +509,23 @@ class Input extends EventEmitter
      *
      * @param string $key
      * @param mixed  $value
+     * @throws \RuntimeException
      * @return mixed
      */
     public function session($key = null, $value = null)
     {
-        if ($value !== null) {
-            return $this->injectors['sessions'][$key] = $value;
-        } elseif ($key !== null) {
-            return isset($this->injectors['sessions'][$key]) ? $this->injectors['sessions'][$key] : null;
+        if (!$this->injectors['session']) {
+            throw new \RuntimeException("Session has not started?");
         }
+
+        if ($value !== null) {
+            return $this->injectors['session'][$key] = $value;
+        } elseif ($key !== null) {
+            return isset($this->injectors['session'][$key]) ? $this->injectors['session'][$key] : null;
+        }
+
+        // Create associate reference
+        $this->injectors['sessions'] = & $this->injectors['session']->sessions;
 
         return $this->injectors['sessions'];
     }

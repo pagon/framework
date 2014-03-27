@@ -117,6 +117,11 @@ class Session extends Fiber implements \ArrayAccess, \Countable, \Iterator
      */
     public function __construct(array $injectors = array())
     {
+        // Auto global
+        if (!isset($injectors['global'])) {
+            $injectors['global'] = PHP_SAPI === 'CLI' ? false : true;
+        }
+
         parent::__construct($injectors + $this->injectors);
 
         // Use default store is not set
@@ -165,7 +170,7 @@ class Session extends Fiber implements \ArrayAccess, \Countable, \Iterator
         session_cache_limiter(false);
 
         // Register sessions
-        $this->injectors['sessions'] = & $this->injectors['app']->input->sessions;
+        $this->injectors['app']->input->session = $this;
 
         // Support store
         if ($this->injectors['store']) {
