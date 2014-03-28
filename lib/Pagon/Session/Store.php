@@ -14,13 +14,16 @@ abstract class Store extends Fiber
             $type = $type['type'];
         }
 
-        $class = __NAMESPACE__ . '\\Store\\' . ucfirst(strtolower($type));
+        $prefixes[] = '';
+        $prefixes[] = __NAMESPACE__ . "\\Store";
 
-        if (!class_exists($class) && !class_exists($class = $type)) {
-            throw new \InvalidArgumentException('Can not find given "' . $type . '" session store adapter');
+        foreach ($prefixes as $namespace) {
+            if (!is_subclass_of($class = ($namespace ? $namespace . '\\' : '') . $type, __CLASS__, true)) continue;
+
+            return new $class($config);
         }
 
-        return new $class($config);
+        throw new \InvalidArgumentException("Non-exists store class '$type'");
     }
 
     public function __construct(array $injectors = array())
