@@ -38,5 +38,7 @@ class Booster extends Middleware
         if ($_log = $app->get($this->injectors['logger'])) {
             $app->logger = Logger::$default = new Logger($_log);
         }
+
+        $this->next();
     }
 }
