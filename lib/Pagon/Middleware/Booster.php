@@ -30,7 +30,7 @@ class Booster extends Middleware
         // Share the cryptor for the app
         if ($_crypt = $app->get($this->injectors['cryptor'])) {
             $app->cryptor = function () use ($_crypt) {
-                new Cryptor($_crypt);
+                return new Cryptor($_crypt);
             };
         }
 
