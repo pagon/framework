@@ -27,6 +27,7 @@ $files = array(
     'Pagon/View',
     'Pagon/View/Error',
     'Pagon/App',
+    'Pagon/Pagon',
     'Pagon/Session',
     'Pagon/Session/Store',
     'Pagon/Session/Store/Cookie',
