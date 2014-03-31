@@ -96,7 +96,6 @@ stacks      中间件
 mounts      应用加载的路径列表
 bundles     包应用
 locals      默认的模板变量
-safe_query  在模板渲染时自动预防XSS
 url_rewrite 是否开启Url rewrite
 ```
 
@@ -185,7 +184,6 @@ $app->add(function($req, $res, $next) {
 - Booster             助推器，根据配置文件为App做一些绑定工作，比如logger和cryptor
 - CSRF                CSRF自动防御中间件
 - OPAuth              OPAuth的中间件，用来做第三方验证
-- PrettyException     异常和错误输出，Debug模式下默认开启
 - Flash               信息闪存，用于验证提示等
 - HttpMethods         完整的Http方法支持
 - HttpBasicAuth       Http Basic验证支持

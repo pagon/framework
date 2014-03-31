@@ -2,26 +2,25 @@
 
 ## 新项目
 
-下载最新版：
+下载：
 
 [https://github.com/hfcorriez/pagon/releases](https://github.com/hfcorriez/pagon/releases)
 
-Git下载：
+```bash
+$ wget https://drone.io/github.com/hfcorriez/pagon/files/build/pagon-master.tar.gz
+```
+
+Git 安装：
 
 ```
-$ git clone https://github.com/hfcorriez/pagon
+$ git clone https://github.com/hfcorriez/pagon myapp
+$ cd myapp && composer.phar install
 ```
 
 Composer:
 
 ```
-$ composer.phar create-project pagon/pagon myapp
-```
-
-单文件：
-
-```
-$ wget https://drone.io/github.com/pagon/framework/files/pack/pagon.core.php
+$ composer.phar create-project pagon/pagon="dev-master" myapp
 ```
 
 ## 已有项目
@@ -29,8 +28,16 @@ $ wget https://drone.io/github.com/pagon/framework/files/pack/pagon.core.php
 Composer:
 
 ```
-$ composer.phar require pagon/framework="*"
+$ composer.phar require pagon/framework="dev-master"
 ```
+
+## 单文件：
+
+```
+$ wget https://drone.io/github.com/pagon/framework/files/pack/pagon.core.php
+```
+
+> 单文件版本目前只包含核心组件
 
 # 使用
 
