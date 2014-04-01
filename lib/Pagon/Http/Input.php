@@ -392,7 +392,7 @@ class Input extends EventEmitter
      */
     public function data($key, $default = null)
     {
-        return isset($this->injectors['query'][$key]) ? $this->injectors['query'][$key] : $default;
+        return isset($this->injectors['data'][$key]) ? $this->injectors['data'][$key] : $default;
     }
 
     /**
