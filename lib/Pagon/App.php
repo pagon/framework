@@ -365,7 +365,7 @@ class App extends EventEmitter
         }
 
         if (func_num_args() > 2) {
-            return $this->router->map($key, array_slice(func_get_args(), 1, 'GET'));
+            return $this->router->map($key, array_slice(func_get_args(), 1), 'GET');
         } else {
             return $this->router->map($key, $default, 'GET');
         }
