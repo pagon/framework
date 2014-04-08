@@ -754,7 +754,7 @@ class App extends EventEmitter
 
             // Start buffer
             if ($this->injectors['buffer']) ob_start();
-            if (!in_array(array('', $this->router, array()), $this->injectors['stacks'])) $this->injectors['stacks'][] = $this->router;
+            if (!in_array($this->router, $this->injectors['stacks'])) $this->injectors['stacks'][] = $this->router;
 
             // Emit "middleware" event
             $this->emit('middleware');
