@@ -3,8 +3,6 @@
 [![Build Status](https://travis-ci.org/pagon/framework.png)](https://travis-ci.org/pagon/framework)
 [![Build Status](https://drone.io/github.com/pagon/framework/status.png)](https://drone.io/github.com/pagon/framework/latest)
 
-邮件列表: [https://groups.google.com/d/forum/pagonframework](https://groups.google.com/d/forum/pagonframework)
-
 ```
 Test cases		: 83
 Code coverage	: 41%

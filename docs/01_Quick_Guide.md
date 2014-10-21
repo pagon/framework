@@ -20,7 +20,7 @@ $ cd myapp && composer.phar install
 Composer:
 
 ```
-$ composer.phar create-project pagon/pagon="dev-master" myapp
+$ composer.phar create-project pagon/pagon myapp
 ```
 
 ## 已有项目
@@ -28,7 +28,7 @@ $ composer.phar create-project pagon/pagon="dev-master" myapp
 Composer:
 
 ```
-$ composer.phar require pagon/framework="dev-master"
+$ composer.phar require pagon/framework
 ```
 
 ## 单文件：
