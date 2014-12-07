@@ -322,7 +322,7 @@ class Router extends Middleware
 
                 if (!$rules) {
                     // Need replace
-                    $path = '/^' . preg_replace('/(?<!\\\\):([a-zA-Z0-9_]+)/', '(?<$1>[^\/]+?)', $path) . '\/?$/';
+                    $path = '/^' . preg_replace('/(?<!\\\\):([a-zA-Z0-9_]+)/', '(?<$1>[^\/]+)', $path) . '\/?$/';
                 } else {
                     $path = '/^' . preg_replace_callback('/(?<!\\\\):([a-zA-Z0-9_]+)/', function ($match) use ($rules) {
                             return '(?<' . $match[1] . '>' . (isset($rules[$match[1]]) ? $rules[$match[1]] : '[^\/]+') . '?)';
