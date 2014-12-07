@@ -160,7 +160,7 @@ class Router extends Middleware
             $defaults = isset($route['defaults']) ? $route['defaults'] : array();
 
             // Try to parse the params
-            if (($params = Router::match($path, $route[1] . ($app->cli ? '(:args)' : ''), $rules, $defaults)) !== false) {
+            if (($params = Router::match($path, $route[1], $rules, $defaults, $app->cli)) !== false) {
                 // Method match
                 if ($route[0] && is_string($route[0]) && strpos($route[0], $method) === false && $route[0] !== '*') return false;
 
@@ -279,9 +279,10 @@ class Router extends Middleware
      * @param string $route
      * @param array  $rules
      * @param array  $defaults
+     * @param bool   $cli
      * @return array|bool
      */
-    public static function match($path, $route, $rules = array(), $defaults = array())
+    public static function match($path, $route, $rules = array(), $defaults = array(), $cli = false)
     {
         $param = false;
 
@@ -292,7 +293,7 @@ class Router extends Middleware
             }
         } else {
             // Try match
-            if (preg_match(self::pathToRegex($route, $rules), $path, $matches)) {
+            if (preg_match(self::pathToRegex($route, $rules, $cli), $path, $matches)) {
                 array_shift($matches);
                 $param = $matches;
             }
@@ -308,9 +309,10 @@ class Router extends Middleware
      * @static
      * @param string $path
      * @param array  $rules
+     * @param bool   $cli
      * @return string
      */
-    public static function pathToRegex($path, $rules = array())
+    public static function pathToRegex($path, $rules = array(), $cli = false)
     {
         if ($path[1] !== '^') {
             $path = str_replace(array('/'), array('\\/'), $path);
@@ -319,14 +321,15 @@ class Router extends Middleware
                 $path = '/' . $path . '/';
             } elseif (strpos($path, ':')) {
                 $path = str_replace(array('(', ')'), array('(?:', ')?'), $path);
+                $suffix = $cli ? '(?:(?<args>.+))?' : '';
 
                 if (!$rules) {
                     // Need replace
-                    $path = '/^' . preg_replace('/(?<!\\\\):([a-zA-Z0-9_]+)/', '(?<$1>[^\/]+)', $path) . '\/?$/';
+                    $path = '/^' . preg_replace('/(?<!\\\\):([a-zA-Z0-9_]+)/', '(?<$1>[^\/ ]+)', $path) . $suffix . '\/?$/';
                 } else {
                     $path = '/^' . preg_replace_callback('/(?<!\\\\):([a-zA-Z0-9_]+)/', function ($match) use ($rules) {
-                            return '(?<' . $match[1] . '>' . (isset($rules[$match[1]]) ? $rules[$match[1]] : '[^\/]+') . '?)';
-                        }, $path) . '\/?$/';
+                            return '(?<' . $match[1] . '>' . (isset($rules[$match[1]]) ? $rules[$match[1]] : '[^\/ ]+') . '?)';
+                        }, $path) . $suffix . '\/?$/';
                 }
             } else {
                 // Full match
