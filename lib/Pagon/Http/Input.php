@@ -76,7 +76,7 @@ class Input extends EventEmitter
                 'app'      => null
             ));
 
-        $this->app = & $this->injectors['app'];
+        $this->app = &$this->injectors['app'];
 
         /**
          * Support input JSON data
@@ -186,7 +186,7 @@ class Input extends EventEmitter
      */
     public function site($basename = null)
     {
-        return $this->scheme() . '://' . $this->domain() . $this->scriptName($basename);
+        return $this->scheme() . '://' . $this->host(true) . $this->scriptName($basename);
     }
 
     /**
@@ -525,7 +525,7 @@ class Input extends EventEmitter
         }
 
         // Create associate reference
-        $this->injectors['sessions'] = & $this->injectors['session']->sessions;
+        $this->injectors['sessions'] = &$this->injectors['session']->sessions;
 
         return $this->injectors['sessions'];
     }
