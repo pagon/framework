@@ -91,7 +91,7 @@ class Cryptor
         $iv = mcrypt_create_iv($this->_iv_size, $this->options['rand']);
 
         // Encrypt the data using the configured options and generated iv
-        $data = mcrypt_encrypt($this->options['cipher'], $this->options['key'], $data, $this->options['mode'], $iv);
+        $data = mcrypt_encrypt($this->options['cipher'], str_pad($this->options['key'], 32, "\0"), $data, $this->options['mode'], $iv);
 
         // Use base64 encoding to convert to a string
         return base64_encode($iv . $data);
@@ -125,6 +125,6 @@ class Cryptor
         $data = substr($data, $this->_iv_size);
 
         // Return the decrypted data, trimming the \0 padding bytes from the end of the data
-        return rtrim(mcrypt_decrypt($this->options['cipher'], $this->options['key'], $data, $this->options['mode'], $iv), "\0");
+        return rtrim(mcrypt_decrypt($this->options['cipher'], str_pad($this->options['key'], 32, "\0"), $data, $this->options['mode'], $iv), "\0");
     }
 }
